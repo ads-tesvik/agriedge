@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>AgriEdge PRO v2 - Tam Sürüm</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+* {box-sizing: border-box;}
+body {font-family: 'Segoe UI', Arial, sans-serif; margin:0; background:#f5f6fa; color:#333;}
+.header {background:linear-gradient(135deg, #2ecc71, #27ae60); color:white; padding:20px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.15);}
+.header h1 {margin:0; font-size:1.5em;}
+.container {padding:20px; max-width:1200px; margin:0 auto;}
+.card {background:white; padding:20px; border-radius:12px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:transform 0.2s;}
+.card:hover {transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.card h3 {margin-top:0; color:#2c3e50; border-bottom:2px solid #2ecc71; padding-bottom:10px;}
+.button {padding:12px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition:all 0.3s; font-size:14px;}
+.button:hover {transform:scale(1.02); box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+.button:active {transform:scale(0.98);}
+.green {background:#2ecc71; color:white;}
+.blue {background:#3498db; color:white;}
+.red {background:#e74c3c; color:white;}
+.gray {background:#95a5a6; color:white;}
+.flex {display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.flex-col {flex-direction:column; align-items:stretch;}
+.hidden {display:none !important;}
+.map-container {height:350px; border-radius:10px; overflow:hidden; margin-top:15px;}
+#mapContainer {height:100%; width:100%; border-radius:10px;}
+input, select {padding:10px 12px; border-radius:6px; border:1px solid #ddd; font-size:14px; flex:1; min-width:120px;}
+input:focus, select:focus {outline:none; border-color:#2ecc71; box-shadow:0 0 0 3px rgba(46,204,113,0.2);}
+.switch {position:relative; display:inline-block; width:56px; height:28px; margin-left:10px;}
+.switch input {opacity:0; width:0; height:0;}
+.slider {position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:28px; transition:0.3s;}
+.slider:before {position:absolute; content:""; height:22px; width:22px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+input:checked + .slider {background:#2ecc71;}
+input:checked + .slider:before {transform:translateX(28px);}
+.stat-box {background:#f8f9fa; padding:15px; border-radius:8px; text-align:center; flex:1;}
+.stat-value {font-size:2em; font-weight:bold; color:#2ecc71;}
+.stat-label {font-size:0.9em; color:#666;}
+.alert {background:#fff3cd; border-left:4px solid #ffc107; padding:10px; border-radius:4px; margin:5px 0;}
+.alert.critical {background:#f8d7da; border-color:#dc3545;}
+.alert.success {background:#d4edda; border-color:#28a745;}
+.login-input {width:100%; margin-bottom:10px;}
+.button-group {display:flex; gap:10px; margin-top:15px;}
+#adminError {color:#e74c3c; margin:10px 0; font-weight:bold;}
+.sensor-badge {font-size:0.8rem; margin-top:5px;}
+.legend {display:flex; gap:1rem; align-items:center; font-size:0.8rem; margin-top:10px;}
+.legend-color {width:20px; height:20px; border-radius:4px;}
+.grid-2 {display:grid; grid-template-columns:1fr 1fr; gap:1rem;}
+@media (max-width:768px) {.container {padding:15px;}.header h1 {font-size:1.2em;}.flex {flex-direction:column;}input, select {width:100%; min-width:unset;}.button {width:100%;}.stat-box {min-width:100%;}.grid-2 {grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🌱 AgriEdge Akıllı Tarım Sistemi PRO v2</h1>
+</div>
+
+<!-- Ana Giriş -->
+<div class="container" id="login">
+  <div class="card">
+    <h3>Panel Seçimi</h3>
+    <div class="button-group">
+      <button class="button green" onclick="enterFarmer()">👨‍🌾 Çiftçi Paneli</button>
+      <button class="button blue" onclick="showAdminLogin()">🛠️ Yönetici Paneli</button>
+    </div>
+  </div>
+</div>
+
+<!-- Yönetici Girişi -->
+<div class="container hidden" id="adminLogin">
+  <div class="card">
+    <h3>Yönetici Girişi</h3>
+    <input class="login-input" id="adminUser" placeholder="Kullanıcı Adı">
+    <input class="login-input" id="adminPass" placeholder="Şifre" type="password">
+    <div class="button-group">
+      <button class="button blue" onclick="enterAdmin()">Giriş Yap</button>
+      <button class="button gray" onclick="backLogin()">Geri</button>
+    </div>
+    <p id="adminError"></p>
+  </div>
+</div>
+
+<!-- ÇİFTÇİ PANELİ (TAM İÇERİK) -->
+<div class="container hidden" id="farmerPanel">
+  <div class="flex" style="justify-content: space-between;">
+    <h2>👨‍🌾 Çiftçi Paneli - <span id="farmerName">Hoş Geldiniz</span></h2>
+    <button class="button red" onclick="logout()">Çıkış Yap</button>
+  </div>
+
+  <!-- Auto-Pilot -->
+  <div class="card flex">
+    <span style="font-weight:bold;">🤖 Auto-Pilot (Otonom Sulama)</span>
+    <label class="switch">
+      <input type="checkbox" id="autoMode">
+      <span class="slider"></span>
+    </label>
+    <span id="autoStatus" style="font-size:0.8rem;">Kapalı</span>
+  </div>
+
+  <!-- Ada/Parsel Sorgulama + Harita -->
+  <div class="card">
+    <h3>📍 Arazi Sorgulama & NDVI Katmanı</h3>
+    <div class="flex">
+      <input id="il" placeholder="İl (örn: izmir)">
+      <input id="ilce" placeholder="İlçe">
+      <input id="mahalle" placeholder="Mahalle">
+      <input id="ada" placeholder="Ada No">
+      <input id="parsel" placeholder="Parsel No">
+      <button class="button blue" onclick="searchLocation()">Haritada Git</button>
+      <button class="button gray" id="toggleNdvibtn">🛰️ NDVI Katmanını Göster/Gizle</button>
+    </div>
+    <div class="map-container">
+      <div id="mapContainer"></div>
+    </div>
+    <div class="legend">
+      <div class="flex"><div class="legend-color" style="background:#1b5e20;"></div><span>Nem ≥60% (İyi)</span></div>
+      <div class="flex"><div class="legend-color" style="background:#f9a825;"></div><span>Nem 30-60% (Orta)</span></div>
+      <div class="flex"><div class="legend-color" style="background:#c62828;"></div><span>Nem <30% (Kritik)</span></div>
+      <div class="flex"><div class="legend-color" style="background:#1976d2;"></div><span>Sensör Konumu</span></div>
+    </div>
+  </div>
+
+  <!-- Sensör Verileri ve Grafik -->
+  <div class="grid-2">
+    <div class="card">
+      <h3>📡 Anlık Sensör Verileri</h3>
+      <div>💧 Toprak Nemi: <strong id="moisture">--</strong> %</div>
+      <div>🌡️ Sıcaklık: <strong id="temp">--</strong> °C</div>
+      <div>⚡ Durum: <strong id="status">--</strong></div>
+      <div>🔋 Batarya: <strong id="battery">--</strong> %</div>
+      <div>🤖 AI Karar: <strong id="aiDecision">Bekleniyor...</strong></div>
+    </div>
+    <div class="card">
+      <h3>📈 Nem Değişimi (Son 10 ölçüm)</h3>
+      <canvas id="moistureChart" width="400" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- Hastalık Tespiti (Kamera/Galeri) -->
+  <div class="card">
+    <h3>🦠 Yaprak Hastalık Tespiti (Kamera / Galeri)</h3>
+    <div class="flex">
+      <label class="button blue" style="cursor:pointer;">📸 Kamerayı Aç
+        <input type="file" accept="image/*;capture=camera" capture="environment" id="cameraInput" style="display:none;">
+      </label>
+      <label class="button gray" style="cursor:pointer;">🖼️ Galeriden Seç
+        <input type="file" accept="image/*" id="galleryInput" style="display:none;">
+      </label>
+    </div>
+    <img id="diseasePreview" style="max-width:100%; max-height:200px; margin-top:0.8rem; border-radius:1rem; display:none;">
+    <p id="diseaseResult" style="margin-top:0.8rem; font-weight:bold;">Henüz analiz yapılmadı.</p>
+  </div>
+
+  <div class="card">
+    <h3>💰 Kullanım Hakkı (Sorgulama)</h3>
+    <p>Kalan sorgulama: <span id="quota">1000</span></p>
+  </div>
+</div>
+
+<!-- YÖNETİCİ PANELİ (TAM İÇERİK) -->
+<div class="container hidden" id="adminPanel">
+  <div class="card">
+    <div class="flex" style="justify-content: space-between;">
+      <h2>🛠️ Yönetici Paneli</h2>
+      <button class="button red" onclick="logout()">Çıkış Yap</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🔐 Yönetici Şifresini Değiştir</h3>
+    <div class="flex">
+      <input type="password" id="newAdminPass" placeholder="Yeni şifre (min 4 karakter)">
+      <button class="button blue" id="changeAdminPassBtn">Güncelle</button>
+    </div>
+    <p id="passMsg" style="color:green;"></p>
+    <p style="font-size:0.8rem;">Varsayılan: admin / 1234</p>
+  </div>
+  <div class="card">
+    <h3>💰 Ödeme Bekleyen Çiftçiler (Manuel Onay)</h3>
+    <div id="pendingFarmersList">Yükleniyor...</div>
+  </div>
+  <div class="card">
+    <h3>✅ Aktif Çiftçiler (Ödemesi Onaylanmış)</h3>
+    <div id="activeFarmersList">Yükleniyor...</div>
+  </div>
+  <div class="card">
+    <h3>📊 Genel KPI</h3>
+    <p>Toplam Sensör: 52 | Aktif Gateway: 5 | Su Tasarrufu: %28 | Verim Artışı: %18</p>
+  </div>
+</div>
+
+<script>
+// ---------------------------- STORAGE (Yönetici + Çiftçiler) ----------------------------
+const STORAGE = {
+    farmers: 'agriedge_farmers',
+    adminPass: 'agriedge_admin_pass',
+    pending: 'agriedge_pending',
+    currentUser: 'agriedge_current_user'
+};
+const DEFAULT_ADMIN_PASS = '1234';
+
+function getFarmers() { return JSON.parse(localStorage.getItem(STORAGE.farmers) || '[]'); }
+function saveFarmers(f) { localStorage.setItem(STORAGE.farmers, JSON.stringify(f)); }
+function getPending() { return JSON.parse(localStorage.getItem(STORAGE.pending) || '{}'); }
+function savePending(p) { localStorage.setItem(STORAGE.pending, JSON.stringify(p)); }
+function getAdminPass() { return localStorage.getItem(STORAGE.adminPass) || DEFAULT_ADMIN_PASS; }
+function setAdminPass(p) { localStorage.setItem(STORAGE.adminPass, p); }
+
+// Rastgele kod simülasyonu
+function generateCode() { return Math.floor(100000 + Math.random()*900000).toString(); }
+function sendEmailSim(email, code) { alert(`📧 [SIMÜLASYON] ${email} adresine doğrulama kodu: ${code}`); }
+
+// Örnek bir çiftçi kaydı (demo için)
+if (getFarmers().length === 0) {
+    const demoFarmer = {
+        email: "ciftci@example.com",
+        companyName: "Demo Tarım İşletmesi",
+        sector: "tarim",
+        products: "zeytin, üzüm",
+        location: "Manisa/Akhisar",
+        cropDetails: { treeCount: "500", areaM2: "100", rootCount: "2000", pitCount: "250", customFields: [] },
+        isActive: true,
+        isPaid: true,
+        registeredAt: new Date().toISOString()
+    };
+    saveFarmers([demoFarmer]);
+}
+
+// ---------------------------- LEAFLET HARİTA + SENSÖR + NDVI -----------------------------
+let map;
+let ndviLayer = null;
+let sensorMarkers = [];
+let simulationInterval;
+let moistureChart;
+let quota = 1000;
+
+// Sensör verileri (mock)
+const sensorData = [
+    { id: 1, lat: 38.920, lng: 27.840, name: "Sensör A", moisture: 45, temp: 24.2, battery: 92 },
+    { id: 2, lat: 38.925, lng: 27.845, name: "Sensör B", moisture: 28, temp: 25.1, battery: 87 },
+    { id: 3, lat: 38.915, lng: 27.838, name: "Sensör C", moisture: 62, temp: 23.5, battery: 78 },
+    { id: 4, lat: 38.930, lng: 27.850, name: "Sensör D", moisture: 33, temp: 24.8, battery: 95 },
+    { id: 5, lat: 38.910, lng: 27.835, name: "Sensör E", moisture: 51, temp: 24.0, battery: 88 },
+    { id: 6, lat: 38.935, lng: 27.855, name: "Sensör F", moisture: 19, temp: 25.5, battery: 71 }
+];
+
+function updateSensorMarkers() {
+    if (!map) return;
+    sensorMarkers.forEach(m => map.removeLayer(m));
+    sensorMarkers = [];
+    sensorData.forEach(s => {
+        let color = '#2e7d32';
+        if (s.moisture < 30) color = '#c62828';
+        else if (s.moisture < 60) color = '#f9a825';
+        const marker = L.circleMarker([s.lat, s.lng], {
+            radius: 10,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).bindPopup(`
+            <b>${s.name}</b><br>
+            💧 Nem: ${s.moisture}%<br>
+            🌡️ Sıcaklık: ${s.temp}°C<br>
+            🔋 Batarya: ${s.battery}%
+        `).addTo(map);
+        sensorMarkers.push(marker);
+    });
+}
+
+function initMap() {
+    if (map) map.remove();
+    map = L.map('mapContainer').setView([38.920, 27.840], 13);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; CartoDB',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+    // NDVI katmanı (Terria WMS - simülasyon)
+    ndviLayer = L.tileLayer.wms('https://tiles.terria.io/', {
+        layers: 'ndvi',
+        format: 'image/png',
+        transparent: true,
+        opacity: 0.6,
+        attribution: 'NDVI: Sentinel-2'
+    });
+    updateSensorMarkers();
+}
+
+function searchLocation() {
+    const il = document.getElementById('il').value;
+    const ilce = document.getElementById('ilce').value;
+    const mahalle = document.getElementById('mahalle').value;
+    const ada = document.getElementById('ada').value;
+    const parsel = document.getElementById('parsel').value;
+    let query = `${il} ${ilce} ${mahalle} ${ada} ${parsel}`;
+    if (!query.trim()) return;
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+        .then(res => res.json())
+        .then(data => {
+            if (data && data[0]) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                map.setView([lat, lon], 16);
+            } else {
+                alert('Adres bulunamadı, yaklaşık konuma gidiliyor.');
+                map.setView([38.920, 27.840], 12);
+            }
+        })
+        .catch(() => alert('Arama hatası, manuel olarak haritayı kullanın.'));
+}
+
+let ndviVisible = false;
+function toggleNDVI() {
+    if (!map) return;
+    if (ndviVisible) {
+        map.removeLayer(ndviLayer);
+        ndviVisible = false;
+    } else {
+        map.addLayer(ndviLayer);
+        ndviVisible = true;
+    }
+}
+
+// ---------------------------- SENSÖR SİMÜLASYONU VE GRAFİK -----------------------------
+function initChart() {
+    const ctx = document.getElementById('moistureChart').getContext('2d');
+    if (moistureChart) moistureChart.destroy();
+    moistureChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Toprak Nemi (%)', data: [], borderColor: '#2e7d32', tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: true }
+    });
+}
+
+function startSensorSimulation() {
+    if (simulationInterval) clearInterval(simulationInterval);
+    simulationInterval = setInterval(() => {
+        const idx = Math.floor(Math.random() * sensorData.length);
+        const sensor = sensorData[idx];
+        let delta = (Math.random() - 0.5) * 8;
+        let newMoisture = Math.min(100, Math.max(0, sensor.moisture + delta));
+        sensor.moisture = Math.floor(newMoisture);
+        sensor.temp = +(sensor.temp + (Math.random() - 0.5) * 0.8).toFixed(1);
+        
+        const displayMoisture = sensorData[0].moisture;
+        const displayTemp = sensorData[0].temp;
+        document.getElementById('moisture').innerText = displayMoisture;
+        document.getElementById('temp').innerText = displayTemp;
+        document.getElementById('battery').innerText = sensorData[0].battery;
+
+        let auto = document.getElementById('autoMode').checked;
+        document.getElementById('autoStatus').innerText = auto ? 'Aktif' : 'Kapalı';
+        let statusText = displayMoisture > 60 ? "İyi" : (displayMoisture > 30 ? "Orta" : "Kritik");
+        document.getElementById('status').innerText = statusText;
+        let decision = "Sulama gerekmiyor";
+        if (auto && displayMoisture < 30) decision = "⚡ OTOMATİK SULAMA BAŞLATILDI";
+        else if (!auto && displayMoisture < 30) decision = "🔴 Acil sulama önerilir";
+        else if (displayMoisture < 50) decision = "🟡 Yakında sulama gerekebilir";
+        document.getElementById('aiDecision').innerHTML = decision;
+
+        let time = new Date().toLocaleTimeString();
+        if (moistureChart.data.labels.length > 15) {
+            moistureChart.data.labels.shift();
+            moistureChart.data.datasets[0].data.shift();
+        }
+        moistureChart.data.labels.push(time);
+        moistureChart.data.datasets[0].data.push(displayMoisture);
+        moistureChart.update();
+
+        updateSensorMarkers();
+
+        if (quota > 0) { quota--; document.getElementById('quota').innerText = quota; }
+    }, 3000);
+}
+
+// ---------------------------- HASTALIK TESPİTİ (KAMERA) -----------------------------
+function handleImageFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imgPreview = document.getElementById('diseasePreview');
+        imgPreview.src = e.target.result;
+        imgPreview.style.display = 'block';
+        const diseases = ["Zeytin Halkalı Lekesi", "Külleme", "Mantar Enfeksiyonu", "Sağlıklı Yaprak"];
+        const randomDisease = diseases[Math.floor(Math.random() * diseases.length)];
+        const confidence = (Math.random() * 30 + 70).toFixed(1);
+        document.getElementById('diseaseResult').innerHTML = `🧬 Teşhis: ${randomDisease} (Güven: %${confidence})<br>📚 Kaynak: FAO & Tarım Bakanlığı verileri`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ---------------------------- YÖNETİCİ PANELİ İŞLEVLERİ -----------------------------
+function renderAdminPanel() {
+    const farmers = getFarmers();
+    const pendingFarmers = farmers.filter(f => !f.isPaid && f.isActive);
+    const activePaid = farmers.filter(f => f.isPaid && f.isActive);
+    const pendingDiv = document.getElementById('pendingFarmersList');
+    const activeDiv = document.getElementById('activeFarmersList');
+    if(pendingFarmers.length === 0) pendingDiv.innerHTML = '<p>Bekleyen çiftçi yok.</p>';
+    else {
+        pendingDiv.innerHTML = '';
+        pendingFarmers.forEach(f => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `<strong>${f.companyName}</strong> (${f.email})<br>
+                            Ürün: ${f.products} | Lokasyon: ${f.location}<br>
+                            Ağaç: ${f.cropDetails.treeCount} | Alan: ${f.cropDetails.areaM2}<br>
+                            <button class="button green approveBtn" data-email="${f.email}" style="margin-top:5px;">💰 Ödemeyi Onayla</button>`;
+            pendingDiv.appendChild(div);
+        });
+        document.querySelectorAll('.approveBtn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const email = btn.getAttribute('data-email');
+                const updated = farmers.map(f => f.email === email ? {...f, isPaid: true} : f);
+                saveFarmers(updated);
+                renderAdminPanel();
+                alert(`${email} için ödeme onaylandı.`);
+            });
+        });
+    }
+    if(activePaid.length === 0) activeDiv.innerHTML = '<p>Henüz onaylanmış çiftçi yok.</p>';
+    else {
+        activeDiv.innerHTML = '';
+        activePaid.forEach(f => {
+            const p = document.createElement('p');
+            p.innerText = `${f.companyName} - ${f.email}`;
+            activeDiv.appendChild(p);
+        });
+    }
+}
+
+// ---------------------------- GİRİŞ/ÇIKIŞ -----------------------------
+function enterFarmer() {
+    // Demo olarak direkt giriş yapılıyor (önceki kayıt varsa)
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('farmerPanel').classList.remove('hidden');
+    document.getElementById('farmerName').innerText = "Demo Çiftçi";
+    initMap();
+    initChart();
+    startSensorSimulation();
+}
+
+function showAdminLogin() {
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('adminLogin').classList.remove('hidden');
+}
+
+function backLogin() {
+    document.getElementById('adminLogin').classList.add('hidden');
+    document.getElementById('login').classList.remove('hidden');
+    document.getElementById('adminError').innerText = '';
+}
+
+function enterAdmin() {
+    const user = document.getElementById('adminUser').value;
+    const pass = document.getElementById('adminPass').value;
+    if(user === 'admin' && pass === getAdminPass()) {
+        document.getElementById('adminLogin').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        renderAdminPanel();
+    } else {
+        document.getElementById('adminError').innerText = 'Kullanıcı adı veya şifre hatalı';
+    }
+}
+
+function logout() {
+    if (simulationInterval) clearInterval(simulationInterval);
+    document.getElementById('farmerPanel').classList.add('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('login').classList.remove('hidden');
+}
+
+// Event Listeners
+document.getElementById('toggleNdvibtn')?.addEventListener('click', toggleNDVI);
+document.getElementById('changeAdminPassBtn')?.addEventListener('click', () => {
+    const newPass = document.getElementById('newAdminPass').value;
+    if (newPass.length >= 4) {
+        setAdminPass(newPass);
+        document.getElementById('passMsg').innerText = 'Şifre değiştirildi!';
+        setTimeout(() => document.getElementById('passMsg').innerText = '', 2000);
+    } else {
+        alert('En az 4 karakter girin');
+    }
+});
+document.getElementById('cameraInput')?.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
+document.getElementById('galleryInput')?.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
+</script>
+</body>
+</html>
