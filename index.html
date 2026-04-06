@@ -3,1581 +3,592 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgriEdge PRO++ - Akıllı Tarım Sistemi</title>
+<title>AgriEdge PRO++ | 4 Rol + AI Otonom Tarım</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-* {box-sizing: border-box;}
-body {
-  font-family: 'Inter', Arial, sans-serif;
-  margin:0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-  color:#333;
-  min-height:100vh;
-}
-
-/* Agri themed background pattern */
-body::before {
-  content: '';
-  position: fixed;
-  top:0; left:0; right:0; bottom:0;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232ecc71' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index:-1;
-}
-
-/* Header Styles */
-.header {
-  background: linear-gradient(135deg, #1a8f4a 0%, #2ecc71 50%, #27ae60 100%);
-  color:white;
-  padding:25px 20px;
-  text-align:center;
-  box-shadow:0 4px 20px rgba(46,204,113,0.3);
-  position: relative;
-  overflow: hidden;
-}
-.header::before {
-  content: '';
-  position: absolute;
-  top:-50%; left:-50%;
-  width:200%; height:200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: pulse 4s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% {transform: scale(1); opacity: 0.5;}
-  50% {transform: scale(1.1); opacity: 0.8;}
-}
-.header-content {
-  position: relative;
-  z-index:1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-}
-.header-icon {
-  width: 60px;
-  height: 60px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
-.header h1 {
-  margin:0;
-  font-size:1.8em;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.header-subtitle {
-  font-size: 0.95em;
-  opacity: 0.9;
-  margin-top: 5px;
-}
-
-/* Hero Banner */
-.hero-banner {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 15px 25px;
-  text-align: center;
-  font-size: 0.9em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-.hero-banner svg {
-  width: 20px;
-  height: 20px;
-}
-
-.container {
-  padding:25px;
-  max-width:1200px;
-  margin:0 auto;
-  position: relative;
-  z-index: 1;
-}
-
-/* Card Styles */
-.card {
-  background:white;
-  padding:25px;
-  border-radius:16px;
-  margin-bottom:20px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.08);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(46,204,113,0.1);
-  position: relative;
-  overflow: hidden;
-}
-.card::before {
-  content: '';
-  position: absolute;
-  top:0; left:0; right:0;
-  height:4px;
-  background: linear-gradient(90deg, #2ecc71, #27ae60, #2ecc71);
-  background-size: 200% 100%;
-  animation: gradientMove 3s ease infinite;
-}
-@keyframes gradientMove {
-  0% {background-position: 0% 50%;}
-  50% {background-position: 100% 50%;}
-  100% {background-position: 0% 50%;}
-}
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow:0 8px 25px rgba(46,204,113,0.15);
-}
-.card-icon {
-  width: 28px;
-  height: 28px;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-.card h3 {
-  margin:0 0 20px 0;
-  color:#1a252f;
-  font-size: 1.2em;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Button Styles */
-.button {
-  padding:14px 24px;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:600;
-  transition:all 0.3s ease;
-  font-size:14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.button-icon {
-  width: 18px;
-  height: 18px;
-}
-.button:hover {
-  transform: translateY(-2px);
-  box-shadow:0 6px 20px rgba(0,0,0,0.15);
-}
-.button:active {
-  transform: translateY(0);
-}
-.green {background: linear-gradient(135deg, #2ecc71, #27ae60); color:white;}
-.blue {background: linear-gradient(135deg, #3498db, #2980b9); color:white;}
-.red {background: linear-gradient(135deg, #e74c3c, #c0392b); color:white;}
-.gray {background: linear-gradient(135deg, #95a5a6, #7f8c8d); color:white;}
-.orange {background: linear-gradient(135deg, #f39c12, #e67e22); color:white;}
-.purple {background: linear-gradient(135deg, #9b59b6, #8e44ad); color:white;}
-
-/* Layout */
-.flex {display:flex; gap:15px; align-items:center; flex-wrap:wrap;}
-.flex-col {flex-direction:column; align-items:stretch;}
-.hidden {display:none !important;}
-
-/* Map */
-.map-container {
-  height:450px;
-  border-radius:12px;
-  overflow:hidden;
-  margin-top:15px;
-  border: 3px solid #2ecc71;
-  box-shadow: 0 4px 15px rgba(46,204,113,0.2);
-}
-#mapContainer {height:100%; width:100%; border-radius:10px;}
-
-/* Map Controls */
-.map-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-.map-control-btn {
-  padding: 8px 16px;
-  border: 2px solid #2ecc71;
-  border-radius: 8px;
-  background: white;
-  color: #2ecc71;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.map-control-btn:hover {
-  background: #2ecc71;
-  color: white;
-}
-.map-control-btn.active {
-  background: #2ecc71;
-  color: white;
-}
-
-/* Inputs */
-input, select {
-  padding:12px 16px;
-  border-radius:10px;
-  border:2px solid #e0e6ed;
-  font-size:14px;
-  flex:1;
-  min-width:140px;
-  transition: all 0.3s;
-}
-input:focus, select:focus {
-  outline:none;
-  border-color:#2ecc71;
-  box-shadow:0 0 0 4px rgba(46,204,113,0.15);
-}
-
-/* Toggle Switch */
-.switch {
-  position:relative;
-  display:inline-block;
-  width:60px;
-  height:30px;
-  margin-left:15px;
-}
-.switch input {opacity:0; width:0; height:0;}
-.slider {
-  position:absolute;
-  cursor:pointer;
-  top:0; left:0; right:0; bottom:0;
-  background:#ccc;
-  border-radius:30px;
-  transition:0.3s;
-}
-.slider:before {
-  position:absolute;
-  content:"";
-  height:24px;
-  width:24px;
-  left:3px;
-  bottom:3px;
-  background:white;
-  border-radius:50%;
-  transition:0.3s;
-  box-shadow:0 2px 5px rgba(0,0,0,0.2);
-}
-input:checked + .slider {background: linear-gradient(135deg, #2ecc71, #27ae60);}
-input:checked + .slider:before {transform:translateX(30px);}
-
-/* Stats */
-.stat-box {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  padding:20px;
-  border-radius:12px;
-  text-align:center;
-  flex:1;
-  min-width:120px;
-  border: 1px solid #dee2e6;
-  transition: all 0.3s;
-}
-.stat-box:hover {
-  border-color: #2ecc71;
-  transform: scale(1.02);
-}
-.stat-icon {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 10px;
-}
-.stat-value {
-  font-size:2.2em;
-  font-weight:700;
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.stat-label {
-  font-size:0.85em;
-  color:#6c757d;
-  margin-top:5px;
-  font-weight: 500;
-}
-
-/* Alerts */
-.alert {
-  background:#fff8e1;
-  border-left:5px solid #ffc107;
-  padding:15px 20px;
-  border-radius:8px;
-  margin:15px 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.alert-icon {width: 24px; height: 24px;}
-.alert.critical {
-  background:#fdf2f2;
-  border-color:#dc3545;
-}
-.alert.success {
-  background:#e8f5e9;
-  border-color:#28a745;
-}
-.alert.warning {
-  background:#fff3e0;
-  border-color:#ff9800;
-}
-
-/* Login Panel */
-.login-card {
-  max-width: 450px;
-  margin: 40px auto;
-  text-align: center;
-}
-.login-icon {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 20px;
-}
-.login-input {
-  width:100%;
-  margin-bottom:15px;
-  text-align: center;
-  font-size: 16px;
-}
-.button-group {
-  display:flex;
-  gap:12px;
-  margin-top:20px;
-  justify-content: center;
-}
-#adminError {
-  color:#e74c3c;
-  margin:15px 0;
-  font-weight:600;
-  background:#fdf2f2;
-  padding:10px;
-  border-radius:8px;
-}
-
-/* File Upload */
-.file-upload {
-  position: relative;
-  display: inline-block;
-  width: 100%;
-}
-.file-upload input[type="file"] {
-  position: absolute;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-.file-upload-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 30px;
-  border: 3px dashed #2ecc71;
-  border-radius: 12px;
-  background: #f0f9f4;
-  color: #2ecc71;
-  font-weight: 600;
-  transition: all 0.3s;
-}
-.file-upload:hover .file-upload-label {
-  background: #e8f5e9;
-  border-color: #27ae60;
-}
-
-/* Disease Result */
-.disease-result {
-  margin-top:15px;
-  padding:20px;
-  background: linear-gradient(135deg, #f8f9fa, #fff);
-  border-radius:12px;
-  border: 2px solid #e9ecef;
-}
-.severity-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.severity-low {background:#d4edda; color:#155724;}
-.severity-medium {background:#fff3cd; color:#856404;}
-.severity-high {background:#ffe0b2; color:#e65100;}
-.severity-critical {background:#f8d7da; color:#721c24;}
-
-/* AI Decision Panel */
-.ai-panel {
-  padding:20px;
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-  border-radius:12px;
-  min-height:80px;
-  border: 2px solid #81c784;
-  position: relative;
-  overflow: hidden;
-}
-.ai-panel::before {
-  content: '';
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 40px;
-  height: 40px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%232ecc71' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") no-repeat center;
-  opacity: 0.3;
-}
-
-/* Quota Bar */
-.quota-bar {
-  background: #e9ecef;
-  height: 12px;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-top: 10px;
-}
-.quota-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #2ecc71, #27ae60);
-  transition: width 0.5s ease;
-  border-radius: 6px;
-}
-
-/* Admin Table */
-.admin-table {
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
-}
-.admin-table th {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: white;
-  padding:12px 15px;
-  text-align:left;
-  font-weight: 600;
-}
-.admin-table td {
-  padding:12px 15px;
-  border-bottom:1px solid #e9ecef;
-}
-.admin-table tr:hover {
-  background:#f8f9fa;
-}
-
-/* Weather Widget */
-.weather-widget {
-  background: linear-gradient(135deg, #74b9ff, #0984e3);
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.weather-main {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-.weather-icon {
-  width: 60px;
-  height: 60px;
-}
-.weather-temp {
-  font-size: 2.5em;
-  font-weight: 700;
-}
-.weather-desc {
-  font-size: 0.9em;
-  opacity: 0.9;
-}
-.weather-details {
-  text-align: right;
-}
-.weather-detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 5px 0;
-  font-size: 0.9em;
-}
-
-/* Parcel List */
-.parcel-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-.parcel-item {
-  padding: 15px;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.3s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.parcel-item:hover {
-  border-color: #2ecc71;
-  background: #f8f9fa;
-}
-.parcel-item.active {
-  border-color: #2ecc71;
-  background: #e8f5e9;
-}
-.parcel-info h4 {
-  margin: 0 0 5px 0;
-  color: #2c3e50;
-}
-.parcel-info p {
-  margin: 0;
-  font-size: 0.85em;
-  color: #6c757d;
-}
-.parcel-status {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 0.8em;
-  font-weight: 600;
-}
-.parcel-status.active {background: #d4edda; color: #155724;}
-.parcel-status.inactive {background: #f8d7da; color: #721c24;}
-
-/* Leaflet Custom Popup */
-.leaflet-popup-content-wrapper {
-  border-radius: 10px;
-  border: 2px solid #2ecc71;
-}
-.leaflet-popup-content {
-  font-family: 'Inter', sans-serif;
-}
-
-/* Custom Leaflet Controls */
-.custom-map-control {
-  background: white;
-  border-radius: 8px;
-  padding: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-}
-.custom-map-control button {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  margin: 5px 0;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s;
-}
-
-/* Responsive */
-@media (max-width:768px) {
-  .container {padding:15px;}
-  .header h1 {font-size:1.4em;}
-  .flex {flex-direction:column;}
-  input, select {width:100%; min-width:unset;}
-  .button {width:100%; justify-content: center;}
-  .button-group {flex-direction: column;}
-  .stat-box {min-width:100%;}
-  .header-icon {width: 45px; height: 45px;}
-  .weather-widget {flex-direction: column; gap: 15px; text-align: center;}
-  .weather-details {text-align: center;}
-  .map-controls {justify-content: center;}
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; padding: 20px; }
+.container { max-width: 1400px; margin: 0 auto; }
+.card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+.flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+button { background: #2c7a4d; color: white; border: none; padding: 10px 18px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+button:hover { background: #1e5a3a; transform: translateY(-2px); }
+button.secondary { background: #4a6fa5; }
+button.danger { background: #c0392b; }
+button.warning-btn { background: #e67e22; }
+input, select, textarea { padding: 10px; border-radius: 8px; border: 1px solid #ccc; width: 100%; max-width: 320px; margin-bottom: 8px; }
+textarea { max-width: 100%; min-height: 100px; }
+.hidden { display: none !important; }
+.nav-tabs { display: flex; gap: 8px; border-bottom: 2px solid #ddd; margin-bottom: 20px; flex-wrap: wrap; }
+.nav-tabs button { background: none; color: #2c7a4d; border-radius: 0; border-bottom: 3px solid transparent; padding: 10px 16px; font-weight: 600; }
+.nav-tabs button.active { border-bottom-color: #2c7a4d; color: #1e5a3a; }
+.nav-tabs button:hover { background: #f0f4f8; transform: none; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.alert { padding: 12px 16px; border-radius: 8px; margin: 10px 0; font-weight: 500; }
+.alert.success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+.alert.warning { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+.alert.error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+.alert.info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+.stat-card { background: #f8fafc; padding: 16px; border-radius: 12px; text-align: center; flex: 1; min-width: 120px; border: 1px solid #e2e8f0; }
+.stat-value { font-size: 28px; font-weight: bold; color: #2c7a4d; }
+.stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.badge-gold { background: #fbbf24; color: #78350f; }
+.badge-silver { background: #e5e7eb; color: #374151; }
+.badge-bronze { background: #d97706; color: #fff; }
+.badge-active { background: #d4edda; color: #155724; }
+.badge-pending { background: #fff3cd; color: #856404; }
+.badge-processing { background: #cce5ff; color: #004085; }
+.badge-completed { background: #d4edda; color: #155724; }
+.badge-rejected { background: #f8d7da; color: #721c24; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+th { background: #eef2f5; font-weight: 700; color: #374151; }
+tr:hover { background: #f9fafb; }
+.map-container { height: 350px; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; margin-top: 12px; }
+.sensor-live { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+.sensor-box { flex: 1; min-width: 130px; padding: 16px; border-radius: 12px; text-align: center; font-size: 22px; font-weight: bold; }
+.sensor-box.moisture { background: #dbeafe; color: #1e40af; }
+.sensor-box.temp { background: #fee2e2; color: #991b1b; }
+.sensor-box.wind { background: #d1fae5; color: #065f46; }
+.sensor-box .sensor-label { font-size: 12px; font-weight: 500; margin-top: 4px; }
+.header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 16px 20px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); flex-wrap: wrap; gap: 12px; }
+.header-bar h2 { font-size: 20px; color: #1e5a3a; }
+.auto-mode-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+.auto-on { background: #d4edda; color: #155724; }
+.auto-off { background: #f8d7da; color: #721c24; }
+.parcel-card { background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.parcel-card h4 { color: #1e5a3a; margin-bottom: 8px; }
+.order-card { background: white; border-radius: 12px; padding: 14px 18px; border-left: 4px solid #2c7a4d; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.progress-bar-wrap { background: #e2e8f0; border-radius: 999px; height: 8px; width: 100%; margin-top: 8px; }
+.progress-bar { height: 8px; border-radius: 999px; background: linear-gradient(90deg, #2c7a4d, #4ade80); transition: width 0.5s; }
+.modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-box { background: white; border-radius: 16px; padding: 28px; width: 420px; max-width: 95vw; }
+.modal-box h3 { margin-bottom: 16px; color: #1e5a3a; }
+.language-switch { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.lang-btn { background: #e2e8f0; color: #1e5a3a; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: normal; }
+.lang-btn.active { background: #2c7a4d; color: white; }
 </style>
 </head>
 <body>
+<div class="container">
 
-<!-- Hero Banner -->
-<div class="hero-banner">
-  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-  <span>AgriEdge PRO++ - Yapay Zeka Destekli Akıllı Tarım Sistemi</span>
-</div>
-
-<!-- Header -->
-<div class="header">
-  <div class="header-content">
-    <svg class="header-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="32" cy="32" r="30" fill="#fff" fill-opacity="0.2"/>
-      <path d="M32 8C32 8 20 20 20 32C20 38.627 25.373 44 32 44C38.627 44 44 38.627 44 32C44 20 32 8 32 8Z" fill="#fff"/>
-      <path d="M32 18C32 18 26 26 26 32C26 35.866 28.686 39 32 39C35.314 39 38 35.866 38 32C38 26 32 18 32 18Z" fill="#27ae60"/>
-      <path d="M32 44V56" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <path d="M26 52H38" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="20" cy="20" r="4" fill="#f1c40f"/>
-      <circle cx="48" cy="24" r="3" fill="#e74c3c"/>
-      <circle cx="44" cy="44" r="3" fill="#3498db"/>
-    </svg>
-    <div>
-      <h1>AgriEdge PRO++</h1>
-      <div class="header-subtitle">Akıllı Tarım Yönetim Sistemi</div>
-    </div>
+<!-- Dil Seçici (tüm panellerde görünür olacak) -->
+<div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+  <div class="language-switch">
+    <button class="lang-btn" id="langTr" data-lang="tr">🇹🇷 TR</button>
+    <button class="lang-btn" id="langEn" data-lang="en">🇬🇧 EN</button>
   </div>
 </div>
 
-<!-- Giriş Paneli -->
-<div class="container" id="login">
-  <div class="card login-card">
-    <svg class="login-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="48" fill="#e8f5e9" stroke="#2ecc71" stroke-width="3"/>
-      <path d="M50 15C50 15 30 35 30 55C30 67.15 38.85 76 50 76C61.15 76 70 67.15 70 55C70 35 50 15 50 15Z" fill="#2ecc71"/>
-      <path d="M50 30C50 30 38 45 38 55C38 61.075 43.268 66 50 66C56.732 66 62 61.075 62 55C62 45 50 30 50 30Z" fill="#27ae60"/>
-      <path d="M50 76V92" stroke="#2ecc71" stroke-width="4" stroke-linecap="round"/>
-      <path d="M40 86H60" stroke="#2ecc71" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="30" cy="30" r="6" fill="#f1c40f"/>
-      <circle cx="72" cy="38" r="5" fill="#e67e22"/>
-    </svg>
-    <h3>Panel Seçimi</h3>
-    <p style="color:#6c757d; margin-bottom:25px;">Lütfen giriş yapmak istediğiniz paneli seçin:</p>
-    <div class="button-group">
-      <button class="button green" onclick="enterFarmer()">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-        Çiftçi Paneli
-      </button>
-      <button class="button blue" onclick="showAdminLogin()">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-        Yönetici Paneli
-      </button>
-    </div>
+<!-- ==================== GİRİŞ ==================== -->
+<div id="loginScreen" class="card" style="max-width:480px;margin:50px auto;">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:48px;">🌿</div>
+    <h2 style="color:#1e5a3a;font-size:24px;" data-i18n="appTitle">AgriEdge PRO++</h2>
+    <p style="color:#666;font-size:14px;margin-top:4px;" data-i18n="appSubtitle">Akıllı Tarım Yönetim Sistemi</p>
+  </div>
+  <select id="roleSelect" style="max-width:100%;margin-bottom:12px;">
+    <option value="farmer" data-i18n="roleFarmer">👨‍🌾 Çiftçi</option>
+    <option value="admin" data-i18n="roleAdmin">👑 Ana Yönetici</option>
+    <option value="academic" data-i18n="roleAcademic">🎓 Akademik Yönetici</option>
+    <option value="field" data-i18n="roleField">🔧 Saha Yöneticisi</option>
+  </select>
+  <input type="email" id="loginEmail" placeholder="📧 E-posta" data-i18n-placeholder="emailPlaceholder" style="max-width:100%;">
+  <input type="password" id="loginPassword" placeholder="🔒 Şifre" data-i18n-placeholder="passwordPlaceholder" style="max-width:100%;">
+  <button onclick="handleLogin()" style="width:100%;margin-top:8px;" data-i18n="loginBtn">Giriş Yap</button>
+  <hr style="margin:18px 0;border-color:#eee;">
+  <p style="text-align:center;font-size:14px;color:#555;"><span data-i18n="newFarmer">Yeni çiftçi misiniz?</span>
+    <button class="secondary" onclick="showRegister()" style="padding:6px 14px;font-size:13px;" data-i18n="registerBtn">Kayıt Ol</button>
+  </p>
+  <div id="loginError" class="alert error hidden" style="margin-top:10px;"></div>
+  <div class="alert info" style="margin-top:14px;font-size:12px;">
+    <b data-i18n="demoAccounts">Demo Hesaplar:</b><br>
+    🥇 altin@ciftci.com / 1234  |  🥈 gumus@ciftci.com / 1234  |  🥉 bronz@ciftci.com / 1234<br>
+    👑 admin@agriedge.com / admin123  |  🎓 akademik@uni.edu / akademik123<br>
+    🔧 saha@agriedge.com / saha123
   </div>
 </div>
 
-<!-- Yönetici Giriş -->
-<div class="container hidden" id="adminLogin">
-  <div class="card login-card">
-    <svg class="login-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="48" fill="#e3f2fd" stroke="#3498db" stroke-width="3"/>
-      <rect x="25" y="35" width="50" height="35" rx="5" fill="#3498db"/>
-      <rect x="35" y="25" width="30" height="15" rx="3" fill="#3498db"/>
-      <circle cx="50" cy="50" r="10" fill="#fff"/>
-      <rect x="47" y="52" width="6" height="12" fill="#fff"/>
-    </svg>
-    <h3>Yönetici Girişi</h3>
-    <input class="login-input" id="adminUser" placeholder="Kullanıcı Adı">
-    <input class="login-input" id="adminPass" placeholder="Şifre" type="password">
-    <div class="button-group">
-      <button class="button blue" onclick="enterAdmin()">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-        Giriş Yap
-      </button>
-      <button class="button gray" onclick="backLogin()">
-        <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        Geri
-      </button>
-    </div>
-    <p id="adminError"></p>
+<!-- ==================== KAYIT ==================== -->
+<div id="registerScreen" class="card hidden" style="max-width:520px;margin:50px auto;">
+  <h2 style="color:#1e5a3a;margin-bottom:16px;" data-i18n="registerTitle">👨‍🌾 Çiftçi Kaydı</h2>
+  <input type="text" id="regName" placeholder="Ad Soyad" data-i18n-placeholder="fullnamePlaceholder" style="max-width:100%;">
+  <input type="email" id="regEmail" placeholder="E-posta" data-i18n-placeholder="emailPlaceholder" style="max-width:100%;">
+  <input type="text" id="regPhone" placeholder="Telefon" data-i18n-placeholder="phonePlaceholder" style="max-width:100%;">
+  <select id="regCountry" style="max-width:100%;">
+    <option value="TR">🇹🇷 Türkiye</option>
+    <option value="DE">🇩🇪 Almanya</option>
+    <option value="US">🇺🇸 ABD</option>
+    <option value="AE">🇦🇪 BAE</option>
+  </select>
+  <select id="regPackage" style="max-width:100%;">
+    <option value="gold" data-i18n="goldPackage">🥇 Altın Paket — Tam AI Otonom</option>
+    <option value="silver" data-i18n="silverPackage">🥈 Gümüş Paket — Sınırlı AI</option>
+    <option value="bronze" data-i18n="bronzePackage">🥉 Bronz Paket — Manuel Kontrol</option>
+  </select>
+  <input type="password" id="regPassword" placeholder="Şifre" data-i18n-placeholder="passwordPlaceholder" style="max-width:100%;">
+  <div class="flex" style="margin-top:12px;">
+    <button onclick="registerFarmer()" data-i18n="registerBtn">Kayıt Ol</button>
+    <button class="secondary" onclick="backToLogin()" data-i18n="backBtn">← Geri</button>
   </div>
+  <div id="registerError" class="alert error hidden" style="margin-top:10px;"></div>
 </div>
 
-<!-- Çiftçi Paneli -->
-<div class="container hidden" id="farmerPanel">
-
-  <!-- Auto-Pilot -->
-  <div class="card flex">
-    <div style="display:flex; align-items:center; gap:15px;">
-      <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-        <circle cx="24" cy="24" r="22" fill="#e8f5e9" stroke="#2ecc71" stroke-width="2"/>
-        <path d="M24 12V24L32 28" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="24" cy="24" r="3" fill="#2ecc71"/>
-      </svg>
+<!-- ==================== ÇİFTÇİ PANELİ ==================== -->
+<div id="farmerPanel" class="hidden">
+  <div class="header-bar">
+    <div class="flex" style="gap:10px;align-items:center;">
+      <span style="font-size:32px;">👨‍🌾</span>
       <div>
-        <h3 style="border:none; margin:0; padding:0;">Auto-Pilot</h3>
-        <small style="color:#6c757d;">Otomatik sulama kontrolü</small>
+        <div style="font-weight:700;font-size:18px;color:#1e5a3a;" id="farmerName"></div>
+        <div id="farmerPackageBadge" style="margin-top:3px;"></div>
       </div>
     </div>
-    <label class="switch">
-      <input type="checkbox" id="autoMode">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <!-- Hava Durumu Widget -->
-  <div class="weather-widget">
-    <div class="weather-main">
-      <svg class="weather-icon" viewBox="0 0 64 64" fill="none">
-        <circle cx="32" cy="32" r="28" fill="#f1c40f" opacity="0.3"/>
-        <circle cx="32" cy="32" r="20" fill="#f1c40f"/>
-        <path d="M32 8V12M32 52V56M8 32H12M52 32H56M15 15L18 18M46 46L49 49M15 49L18 46M46 18L49 15" stroke="#f1c40f" stroke-width="3" stroke-linecap="round"/>
-      </svg>
-      <div>
-        <div class="weather-temp" id="weatherTemp">24°C</div>
-        <div class="weather-desc" id="weatherDesc">Güneşli</div>
+    <div class="flex" style="gap:10px;">
+      <div class="stat-card" style="min-width:100px;padding:10px 16px;">
+        <div class="stat-value" style="font-size:20px;" id="farmerQuota">1000</div>
+        <div class="stat-label" data-i18n="remainingQuota">Kalan İşlem</div>
       </div>
-    </div>
-    <div class="weather-details">
-      <div class="weather-detail-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        <span>Rüzgar: <strong id="weatherWind">12 km/s</strong></span>
-      </div>
-      <div class="weather-detail-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        <span>Nem: <strong id="weatherHum">65%</strong></span>
-      </div>
+      <button onclick="logout()" data-i18n="logoutBtn">Çıkış</button>
     </div>
   </div>
 
-  <!-- Arazi Listesi -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
-      Kayıtlı Arazilerim
-    </h3>
-    <div class="parcel-list" id="parcelList">
-      <div class="parcel-item active" onclick="selectParcel(0)">
-        <div class="parcel-info">
-          <h4>Yılmaz Tarlası - 1250 m²</h4>
-          <p>İzmir, Bornova | Ada: 123, Parsel: 45</p>
-        </div>
-        <span class="parcel-status active">Aktif</span>
-      </div>
-      <div class="parcel-item" onclick="selectParcel(1)">
-        <div class="parcel-info">
-          <h4>Demir Bahçesi - 800 m²</h4>
-          <p>Manisa, Turgutlu | Ada: 234, Parsel: 12</p>
-        </div>
-        <span class="parcel-status active">Aktif</span>
-      </div>
-      <div class="parcel-item" onclick="selectParcel(2)">
-        <div class="parcel-info">
-          <h4>Kaya Bostanı - 450 m²</h4>
-          <p>Aydın, Söke | Ada: 567, Parsel: 78</p>
-        </div>
-        <span class="parcel-status inactive">Pasif</span>
-      </div>
-    </div>
+  <div class="nav-tabs" id="farmerTabs">
+    <button class="active" onclick="showFarmerTab('Dashboard')" data-i18n="tabDashboard">🏠 Kontrol Paneli</button>
+    <button onclick="showFarmerTab('Parcels')" data-i18n="tabParcels">🗺️ Arazilerim</button>
+    <button onclick="showFarmerTab('Orders')" data-i18n="tabOrders">📦 Siparişlerim</button>
+    <button onclick="showFarmerTab('Map')" data-i18n="tabMap">🗺️ Harita</button>
   </div>
 
-  <!-- Arazi Sorgulama -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-      Arazi Sorgulama
-    </h3>
-    <div class="flex">
-      <input id="il" placeholder="İl (örn: İzmir)">
-      <input id="ilce" placeholder="İlçe (örn: Bornova)">
-      <input id="mahalle" placeholder="Mahalle">
-    </div>
-    <div class="flex" style="margin-top:15px;">
-      <input id="ada" placeholder="Ada No">
-      <input id="parsel" placeholder="Parsel No">
-    </div>
-  </div>
-
-  <!-- Harita -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
-      Harita Görünümü
-    </h3>
-
-    <!-- Map Controls -->
-    <div class="map-controls">
-      <button class="map-control-btn active" onclick="setMapView('default')" id="btnDefault">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-        Tüm Araziler
-      </button>
-      <button class="map-control-btn" onclick="setMapView('satellite')" id="btnSatellite">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-        Uydu Görünümü
-      </button>
-      <button class="map-control-btn" onclick="setMapView('sensors')" id="btnSensors">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.88 18.47c.44-.7.7-1.51.7-2.39 0-2.49-2.01-4.5-4.5-4.5s-4.5 2.01-4.5 4.5 2.01 4.5 4.5 4.5c.88 0 1.69-.26 2.39-.7L21.58 23 23 21.58l-3.12-3.11zm-9.38-2.39c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5z"/></svg>
-        Sensörler
-      </button>
-      <button class="map-control-btn" onclick="refreshMap()" id="btnRefresh">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
-        Yenile
-      </button>
-    </div>
-
-    <div class="map-container">
-      <div id="mapContainer"></div>
-    </div>
-
-    <!-- Map Legend -->
-    <div style="margin-top:15px; padding:15px; background:#f8f9fa; border-radius:10px;">
-      <h4 style="margin:0 0 10px 0; color:#2c3e50; font-size:14px;">Harita Açıklaması</h4>
-      <div style="display:flex; gap:20px; flex-wrap:wrap; font-size:13px;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="width:14px; height:14px; background:#2ecc71; border-radius:50%;"></span>
-          <span>Sağlıklı Sensör</span>
+  <div id="farmerDashboard" class="tab-content active">
+    <div class="card">
+      <div class="flex" style="justify-content:space-between;margin-bottom:14px;">
+        <h3 data-i18n="liveSensorData">🌡️ Canlı Sensör Verileri</h3>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;" id="autoModeLabel">
+          <input type="checkbox" id="autoModeCheckbox" onchange="toggleAutoMode()">
+          <span id="autoModeBadge" class="auto-mode-badge auto-off" data-i18n="autoOff">🤖 AI Otonom: KAPALI</span>
+        </label>
+      </div>
+      <div class="sensor-live">
+        <div class="sensor-box moisture">
+          <div id="sensorMoisture">--</div>
+          <div class="sensor-label" data-i18n="moistureLabel">💧 Nem (%)</div>
+          <div class="progress-bar-wrap"><div class="progress-bar" id="moistureBar" style="width:0%"></div></div>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="width:14px; height:14px; background:#f39c12; border-radius:50%;"></span>
-          <span>Orta Durum</span>
+        <div class="sensor-box temp">
+          <div id="sensorTemp">--</div>
+          <div class="sensor-label" data-i18n="tempLabel">🌡️ Sıcaklık (°C)</div>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="width:14px; height:14px; background:#e74c3c; border-radius:50%;"></span>
-          <span>Kritik Sensör</span>
+        <div class="sensor-box wind">
+          <div id="sensorWind">--</div>
+          <div class="sensor-label" data-i18n="windLabel">💨 Rüzgar (km/s)</div>
         </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span style="width:20px; height:3px; background:#2ecc71;"></span>
-          <span>Arazi Sınırı</span>
+        <div class="sensor-box" style="background:#fef3c7;color:#92400e;">
+          <div id="sensorLight">--</div>
+          <div class="sensor-label" data-i18n="lightLabel">☀️ Işık (lux)</div>
         </div>
       </div>
+      <div id="aiDecision" class="alert info" data-i18n="aiAnalyzing">🤖 AI sensörlü analiz yapıyor...</div>
+      <div class="flex" style="margin-top:12px;" id="manualBtns">
+        <button id="manualIrrigateBtn" onclick="manualIrrigate()" data-i18n="manualIrrigate">💧 Manuel Sulama</button>
+        <button id="manualFertilizeBtn" class="secondary" onclick="manualFertilize()" data-i18n="manualFertilize">🌱 Gübrele</button>
+        <button class="warning-btn" onclick="requestAnalysis()" data-i18n="requestAnalysis">🔬 Analiz İste</button>
+      </div>
+      <div id="activityLog" style="margin-top:16px;max-height:160px;overflow-y:auto;font-size:13px;"></div>
+    </div>
+    <div class="card">
+      <h3 data-i18n="liveChart">📊 Canlı Sensör Grafiği</h3>
+      <canvas id="farmerChart" height="180"></canvas>
     </div>
   </div>
 
-  <!-- Canlı Dashboard -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-      Canlı Dashboard
-    </h3>
-    <div class="flex">
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="28" r="16" fill="#3498db" fill-opacity="0.2"/>
-          <path d="M24 12V28L32 32" stroke="#3498db" stroke-width="3" stroke-linecap="round"/>
-          <path d="M12 36c0-6.63 5.37-12 12-12s12 5.37 12 12" stroke="#3498db" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-        <div class="stat-value" id="moisture">--</div>
-        <div class="stat-label">Toprak Nem (%)</div>
-      </div>
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="18" fill="#e74c3c" fill-opacity="0.2"/>
-          <path d="M24 8v8M24 32v8M8 24h8M32 24h8M12 12l6 6M30 30l6 6M12 36l6-6M30 18l6-6" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="24" cy="24" r="6" fill="#e74c3c"/>
-        </svg>
-        <div class="stat-value" id="temp">--</div>
-        <div class="stat-label">Sıcaklık (°C)</div>
-      </div>
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <path d="M24 4C24 4 12 16 12 28C12 34.627 17.373 40 24 40C30.627 40 36 34.627 36 28C36 16 24 4 24 4Z" fill="#3498db" fill-opacity="0.3" stroke="#3498db" stroke-width="2"/>
-        </svg>
-        <div class="stat-value" id="humidity">--</div>
-        <div class="stat-label">Hava Nem (%)</div>
-      </div>
+  <div id="farmerParcels" class="tab-content">
+    <div class="flex" style="margin-bottom:16px;">
+      <button class="secondary" onclick="showAddParcelModal()" data-i18n="addParcelBtn">➕ Yeni Arazi Ekle</button>
     </div>
-    <div id="statusBox" class="alert">
-      <svg class="alert-icon" viewBox="0 0 24 24" fill="#ffc107"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-      Durum: <span id="status">Bekleniyor...</span>
-    </div>
+    <div id="parcelsList" class="grid"></div>
+    <div id="noParcels" class="alert info hidden" data-i18n="noParcelsMsg">Henüz arazi eklemediniz. Yukarıdan ekleyebilirsiniz.</div>
   </div>
 
-  <!-- Grafik -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
-      Nem & Sıcaklık Grafik
-    </h3>
-    <canvas id="chart"></canvas>
+  <div id="farmerOrders" class="tab-content">
+    <h3 style="margin-bottom:12px;" data-i18n="myOrdersTitle">📦 Sensör Siparişlerim</h3>
+    <div id="ordersList"></div>
+    <div id="noOrders" class="alert info hidden" data-i18n="noOrdersMsg">Henüz sipariş bulunmuyor. Arazilerinize sensör siparişi verebilirsiniz.</div>
   </div>
 
-  <!-- Hastalık Tespiti -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-      Yapay Zeka Hastalık Tespiti
-    </h3>
-    <div class="file-upload">
-      <input type="file" accept="image/*" capture="camera" onchange="analyzeDisease(event)">
-      <div class="file-upload-label">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="#2ecc71"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-        <span>Bitki Fotoğrafı Yükle veya Kamera Aç</span>
-      </div>
-    </div>
-    <div id="diseaseResult" class="disease-result">
-      <p style="color:#6c757d; text-align:center;">Bitki görüntüsü yükleyerek hastalık analizi yapabilirsiniz.</p>
+  <div id="farmerMap" class="tab-content">
+    <div class="card">
+      <h3 data-i18n="mapTitle">🗺️ Arazi ve Sensör Haritası</h3>
+      <div id="leafletMap" class="map-container"></div>
     </div>
   </div>
-
-  <!-- AI Karar -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M21 11.5v1c0 .28-.22.5-.5.5H19.5v2.5c0 .28-.22.5-.5.5H17c-.28 0-.5-.22-.5-.5V13h-1.5c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5H17v-2H3.5c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5H5v-2H3.5c-.28 0-.5-.22-.5-.5v-1c0-.28.22-.5.5-.5H5V3c0-.28.22-.5.5-.5h13c.28 0 .5.22.5.5v3.5h1.5c.28 0 .5.22.5.5v1c0 .28-.22.5-.5.5H19.5v2h1.5c.28 0 .5.22.5.5zM9 14.5c0 1.93-1.57 3.5-3.5 3.5S2 16.43 2 14.5 3.57 11 5.5 11s3.5 1.57 3.5 3.5z"/></svg>
-      AI Karar Destek Sistemi
-    </h3>
-    <div id="aiDecision" class="ai-panel">
-      <p style="margin:0; color:#2e7d32;">Analiz bekleniyor...</p>
-    </div>
-  </div>
-
-  <!-- Kullanım Hakkı -->
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>
-      Kullanım Hakkı
-    </h3>
-    <div class="flex">
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#2ecc71" fill-opacity="0.2"/>
-          <text x="24" y="30" text-anchor="middle" fill="#2ecc71" font-size="18" font-weight="bold" id="quotaIcon">1000</text>
-        </svg>
-        <div class="stat-value" id="quota">1000</div>
-        <div class="stat-label">Kalan İşlem Hakkı</div>
-        <div class="quota-bar">
-          <div class="quota-fill" id="quotaFill" style="width:100%"></div>
-        </div>
-      </div>
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#f39c12" fill-opacity="0.2"/>
-          <text x="24" y="30" text-anchor="middle" fill="#f39c12" font-size="18" font-weight="bold">0</text>
-        </svg>
-        <div class="stat-value" style="background:linear-gradient(135deg, #f39c12, #e67e22); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">0</div>
-        <div class="stat-label">Bugünkü Kullanım</div>
-      </div>
-    </div>
-  </div>
-
-  <button class="button red" onclick="logout()">
-    <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-    Çıkış Yap
-  </button>
 </div>
 
-<!-- Yönetici Paneli -->
-<div class="container hidden" id="adminPanel">
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#3498db"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
-      Yönetici Dashboard
-    </h3>
-    <select id="customerSelect" onchange="loadCustomerData()" style="width:100%; margin-bottom:10px;">
-      <option value="">Müşteri Seçin...</option>
-      <option value="farmer1">Çiftçi 1 - Mehmet Yılmaz (İzmir)</option>
-      <option value="farmer2">Çiftçi 2 - Ayşe Demir (Manisa)</option>
-      <option value="farmer3">Çiftçi 3 - Hasan Kaya (Aydın)</option>
-    </select>
+<!-- ==================== ANA YÖNETİCİ PANELİ ==================== -->
+<div id="adminPanel" class="hidden">
+  <div class="header-bar"><h2 data-i18n="adminPanelTitle">👑 Ana Yönetici Paneli</h2><button onclick="logout()" data-i18n="logoutBtn">Çıkış</button></div>
+  <div class="flex" style="margin-bottom:20px;" id="adminStats"></div>
+  <div class="nav-tabs" id="adminTabs">
+    <button class="active" onclick="showAdminTab('Farmers')" data-i18n="tabFarmers">👥 Çiftçiler</button>
+    <button onclick="showAdminTab('Orders')" data-i18n="tabOrders">📦 Siparişler</button>
+    <button onclick="showAdminTab('Reports')" data-i18n="tabReports">📊 Raporlar</button>
+    <button onclick="showAdminTab('Email')" data-i18n="tabEmail">📧 E-posta</button>
   </div>
-
-  <div class="card hidden" id="adminCustomerData">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-      Müşteri Detayları
-    </h3>
-    <div class="flex">
-      <div class="stat-box">
-        <div class="stat-label">Arazi Sayısı</div>
-        <div class="stat-value" id="adminParcelCount">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Aktif Sensör</div>
-        <div class="stat-value" id="adminSensorCount">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">Kalan Hak</div>
-        <div class="stat-value" id="adminQuota">0</div>
-      </div>
+  <div id="adminFarmers" class="tab-content active">
+    <div class="flex" style="margin-bottom:12px;justify-content:space-between;">
+      <input id="farmerSearch" placeholder="🔍 Çiftçi ara..." data-i18n-placeholder="searchFarmer" style="max-width:240px;">
+      <select id="farmerFilterPkg" onchange="filterFarmers()" style="max-width:180px;">
+        <option value="" data-i18n="allPackages">Tüm Paketler</option>
+        <option value="gold" data-i18n="goldPackageShort">🥇 Altın</option>
+        <option value="silver" data-i18n="silverPackageShort">🥈 Gümüş</option>
+        <option value="bronze" data-i18n="bronzePackageShort">🥉 Bronz</option>
+      </select>
     </div>
-    <h4 style="margin-top:25px;">Son AI Kararları:</h4>
-    <div id="adminAiLog"></div>
+    <div id="adminFarmersTable"></div>
   </div>
-
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#f39c12"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-      Ödeme ve Üyelik Yönetimi
-    </h3>
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>Müşteri</th>
-          <th>Ödeme</th>
-          <th>Üyelik</th>
-          <th>Bitiş Tarihi</th>
-          <th>İşlem</th>
-        </tr>
-      </thead>
-      <tbody id="paymentTable">
-        <tr>
-          <td><strong>Mehmet Yılmaz</strong></td>
-          <td><span style="color:#27ae60; font-weight:600;">● Ödenmiş</span></td>
-          <td><span style="background:#27ae60; color:white; padding:2px 8px; border-radius:10px; font-size:12px;">Premium</span></td>
-          <td>15.06.2026</td>
-          <td><button class="button gray" style="padding:6px 12px; font-size:12px;">Düzenle</button></td>
-        </tr>
-        <tr>
-          <td><strong>Ayşe Demir</strong></td>
-          <td><span style="color:#f39c12; font-weight:600;">● Bekliyor</span></td>
-          <td><span style="background:#95a5a6; color:white; padding:2px 8px; border-radius:10px; font-size:12px;">Standart</span></td>
-          <td>22.04.2026</td>
-          <td><button class="button gray" style="padding:6px 12px; font-size:12px;">Düzenle</button></td>
-        </tr>
-        <tr>
-          <td><strong>Hasan Kaya</strong></td>
-          <td><span style="color:#27ae60; font-weight:600;">● Ödenmiş</span></td>
-          <td><span style="background:#27ae60; color:white; padding:2px 8px; border-radius:10px; font-size:12px;">Premium</span></td>
-          <td>30.07.2026</td>
-          <td><button class="button gray" style="padding:6px 12px; font-size:12px;">Düzenle</button></td>
-        </tr>
-      </tbody>
-    </table>
+  <div id="adminOrders" class="tab-content">
+    <div class="flex" style="margin-bottom:12px;"><select id="orderStatusFilter" onchange="filterOrders()" style="max-width:200px;"><option value="" data-i18n="allStatus">Tüm Durumlar</option><option value="pending" data-i18n="statusPending">⏳ Bekleyen</option><option value="processing" data-i18n="statusProcessing">🔄 İşlemde</option><option value="completed" data-i18n="statusCompleted">✅ Tamamlandı</option><option value="rejected" data-i18n="statusRejected">❌ Reddedildi</option></select></div>
+    <div id="adminOrdersTable"></div>
   </div>
-
-  <div class="card">
-    <h3>
-      <svg class="card-icon" viewBox="0 0 24 24" fill="#2ecc71"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-      Sistem İstatistikleri
-    </h3>
-    <div class="flex">
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#2ecc71" fill-opacity="0.2"/>
-          <text x="24" y="30" text-anchor="middle" fill="#2ecc71" font-size="16" font-weight="bold">3</text>
-        </svg>
-        <div class="stat-value">3</div>
-        <div class="stat-label">Toplam Müşteri</div>
-      </div>
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#3498db" fill-opacity="0.2"/>
-          <text x="24" y="30" text-anchor="middle" fill="#3498db" font-size="16" font-weight="bold">12</text>
-        </svg>
-        <div class="stat-value" style="background:linear-gradient(135deg, #3498db, #2980b9); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">12</div>
-        <div class="stat-label">Toplam Sensör</div>
-      </div>
-      <div class="stat-box">
-        <svg class="stat-icon" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" fill="#f39c12" fill-opacity="0.2"/>
-          <text x="24" y="30" text-anchor="middle" fill="#f39c12" font-size="14" font-weight="bold">2.5K</text>
-        </svg>
-        <div class="stat-value" style="background:linear-gradient(135deg, #f39c12, #e67e22); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">2.5K</div>
-        <div class="stat-label">Toplam İşlem</div>
-      </div>
+  <div id="adminReports" class="tab-content">
+    <div class="flex" style="margin-bottom:16px;"><button onclick="generateReport()" data-i18n="generateReportBtn">📄 Sistem Raporu Oluştur</button><button class="secondary" onclick="generateChartReport()" data-i18n="chartReportBtn">📊 Grafik Raporu</button></div>
+    <div id="reportOutput"></div>
+    <canvas id="adminChart" height="140" style="margin-top:16px;display:none;"></canvas>
+  </div>
+  <div id="adminEmail" class="tab-content">
+    <div class="card">
+      <h3 data-i18n="emailTitle">📧 Toplu / Bireysel E-posta Gönder</h3>
+      <select id="emailTarget" style="max-width:100%;margin-bottom:10px;">
+        <option value="all" data-i18n="emailAll">Tüm Çiftçiler</option>
+        <option value="gold" data-i18n="emailGold">🥇 Altın Paket</option>
+        <option value="silver" data-i18n="emailSilver">🥈 Gümüş Paket</option>
+        <option value="bronze" data-i18n="emailBronze">🥉 Bronz Paket</option>
+        <option value="custom" data-i18n="emailCustom">Özel E-posta</option>
+      </select>
+      <div id="customEmailWrap" class="hidden"><input id="emailTo" placeholder="ornek@eposta.com" data-i18n-placeholder="customEmailPlaceholder" style="max-width:100%;"></div>
+      <input id="emailSubject" placeholder="Konu" data-i18n-placeholder="subjectPlaceholder" style="max-width:100%;"><textarea id="emailMsg" placeholder="Mesaj metni..." data-i18n-placeholder="messagePlaceholder" style="max-width:100%;width:100%;"></textarea>
+      <button onclick="sendEmailSimulate()" style="margin-top:8px;" data-i18n="sendBtn">📤 Gönder</button><div id="emailStatus" style="margin-top:10px;"></div>
     </div>
   </div>
+</div>
 
-  <button class="button red" onclick="logout()">
-    <svg class="button-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-    Çıkış Yap
-  </button>
+<!-- ==================== AKADEMİK YÖNETİCİ PANELİ ==================== -->
+<div id="academicPanel" class="hidden">
+  <div class="header-bar"><h2 data-i18n="academicPanelTitle">🎓 Akademik Yönetici Paneli</h2><button onclick="logout()" data-i18n="logoutBtn">Çıkış</button></div>
+  <div class="nav-tabs" id="academicTabs">
+    <button class="active" onclick="showAcademicTab('Data')" data-i18n="tabDataset">📂 Veri Seti</button>
+    <button onclick="showAcademicTab('Analysis')" data-i18n="tabAnalysis">🔬 Analiz & Rapor</button>
+    <button onclick="showAcademicTab('Stats')" data-i18n="tabStats">📊 İstatistikler</button>
+  </div>
+  <div id="academicData" class="tab-content active">
+    <div class="card"><h3 data-i18n="uploadDatasetTitle">📤 Veri Seti Yükle</h3><p style="color:#666;font-size:13px;margin-bottom:12px;" data-i18n="uploadHint">CSV veya TXT formatında tarım verisi yükleyin.</p><input type="file" id="docUpload" accept=".csv,.txt" style="max-width:100%;"><button onclick="uploadDataset()" style="margin-top:8px;" data-i18n="uploadBtn">⬆️ Yükle</button><div id="uploadStatus" style="margin-top:8px;"></div></div>
+    <div class="card"><h3 data-i18n="datasetsTitle">📁 Yüklenen Veri Setleri</h3><div id="uploadedDocs"></div></div>
+  </div>
+  <div id="academicAnalysis" class="tab-content">
+    <div class="card"><h3 data-i18n="academicAnalysisTitle">🔬 Akademik Analiz</h3><div class="flex" style="margin-bottom:16px;"><button onclick="generateAcademicReport()" data-i18n="generateReportBtn">📝 Rapor Oluştur</button><button class="secondary" onclick="exportAcademicReport()" data-i18n="exportReportBtn">💾 Raporu İndir</button></div><div id="academicReport"></div></div>
+  </div>
+  <div id="academicStats" class="tab-content">
+    <div class="card"><h3 data-i18n="systemStatsTitle">📊 Sistem Genel İstatistikleri</h3><div id="academicStatsContent"></div><canvas id="academicChart" height="160" style="margin-top:16px;"></canvas></div>
+  </div>
+</div>
+
+<!-- ==================== SAHA YÖNETİCİSİ PANELİ =================== -->
+<div id="fieldPanel" class="hidden">
+  <div class="header-bar"><h2 data-i18n="fieldPanelTitle">🔧 Saha Yöneticisi Paneli</h2><button onclick="logout()" data-i18n="logoutBtn">Çıkış</button></div>
+  <div class="flex" style="margin-bottom:20px;" id="fieldStats"></div>
+  <div class="nav-tabs" id="fieldTabs">
+    <button class="active" onclick="showFieldTab('Pending')" data-i18n="tabPendingTasks">⏳ Bekleyen Görevler</button>
+    <button onclick="showFieldTab('History')" data-i18n="tabHistory">📋 Geçmiş İşlemler</button>
+    <button onclick="showFieldTab('Billing')" data-i18n="tabBilling">💰 Faturalandırma</button>
+    <button onclick="showFieldTab('FieldMap')" data-i18n="tabFieldMap">🗺️ Saha Haritası</button>
+  </div>
+  <div id="fieldPending" class="tab-content active"><div id="pendingOrdersList"></div><div id="noPending" class="alert success hidden" data-i18n="noPendingTasks">✅ Bekleyen görev bulunmuyor.</div></div>
+  <div id="fieldHistory" class="tab-content"><div id="fieldHistoryList"></div><div id="noHistory" class="alert info hidden" data-i18n="noHistoryMsg">Henüz tamamlanan işlem yok.</div></div>
+  <div id="fieldBilling" class="tab-content">
+    <div class="card"><h3 data-i18n="billingTitle">💰 Çiftçi Ücretlendirme</h3><div class="flex" style="flex-direction:column;align-items:flex-start;gap:10px;"><select id="billingFarmer" style="max-width:100%;"></select><select id="billingService"><option value="sensor_install" data-i18n="serviceSensorInstall">Sensör Kurulumu</option><option value="maintenance" data-i18n="serviceMaintenance">Bakım-Onarım</option><option value="consultation" data-i18n="serviceConsultation">Danışmanlık</option><option value="emergency" data-i18n="serviceEmergency">Acil Müdahale</option><option value="custom" data-i18n="serviceCustom">Özel Hizmet</option></select><input id="billAmount" placeholder="Tutar (TL)" type="number" data-i18n-placeholder="amountPlaceholder"><textarea id="billNote" placeholder="Not (isteğe bağlı)" data-i18n-placeholder="notePlaceholder" style="max-width:100%;width:320px;min-height:70px;"></textarea><button onclick="chargeFarmer()" data-i18n="invoiceBtn">💳 Fatura Kes</button></div><div id="billingResult" style="margin-top:12px;"></div></div>
+    <div class="card"><h3 data-i18n="invoiceHistoryTitle">📜 Fatura Geçmişi</h3><div id="billingHistory"></div></div>
+  </div>
+  <div id="fieldFieldMap" class="tab-content"><div class="card"><h3 data-i18n="fieldMapTitle">🗺️ Aktif Sensör ve Arazi Haritası</h3><div id="fieldLeafletMap" class="map-container"></div></div></div>
+</div>
+
+<!-- MODALS -->
+<div id="addParcelModal" class="modal-overlay hidden"><div class="modal-box"><h3 data-i18n="addParcelModalTitle">➕ Yeni Arazi Ekle</h3><input id="parcelName" placeholder="Arazi Adı *" data-i18n-placeholder="parcelNamePlaceholder"><input id="parcelCity" placeholder="İl *" data-i18n-placeholder="cityPlaceholder"><input id="parcelDistrict" placeholder="İlçe *" data-i18n-placeholder="districtPlaceholder"><input id="parcelAda" placeholder="Ada No" data-i18n-placeholder="adaPlaceholder"><input id="parcelParsel" placeholder="Parsel No" data-i18n-placeholder="parselPlaceholder"><input id="parcelArea" placeholder="Alan (dönüm)" type="number" data-i18n-placeholder="areaPlaceholder"><select id="parcelCrop"><option value="wheat" data-i18n="cropWheat">🌾 Buğday</option><option value="corn" data-i18n="cropCorn">🌽 Mısır</option><option value="sunflower" data-i18n="cropSunflower">🌻 Ayçiçeği</option><option value="cotton" data-i18n="cropCotton">🌱 Pamuk</option><option value="tomato" data-i18n="cropTomato">🍅 Domates</option><option value="other" data-i18n="cropOther">🌿 Diğer</option></select><div class="flex" style="margin-top:16px;"><button onclick="addParcel()" data-i18n="saveBtn">💾 Kaydet</button><button class="secondary" onclick="closeModal()" data-i18n="cancelBtn">İptal</button></div></div></div>
+<div id="orderDetailModal" class="modal-overlay hidden"><div class="modal-box"><h3 data-i18n="orderDetailTitle">📦 Sipariş Detayı</h3><div id="orderDetailContent"></div><button class="secondary" onclick="document.getElementById('orderDetailModal').classList.add('hidden')" style="margin-top:16px;" data-i18n="closeBtn">Kapat</button></div></div>
 </div>
 
 <script>
-// Global Değişkenler
-let quota = 1000;
-const initialQuota = 1000;
-let todayUsage = 0;
-let chart;
-let map = null;
-let parcelLayer = null;
-let sensorMarkers = [];
+// ==================== DİL DESTEĞİ ====================
+const translations = {
+  tr: {
+    appTitle: "AgriEdge PRO++", appSubtitle: "Akıllı Tarım Yönetim Sistemi",
+    roleFarmer: "👨‍🌾 Çiftçi", roleAdmin: "👑 Ana Yönetici", roleAcademic: "🎓 Akademik Yönetici", roleField: "🔧 Saha Yöneticisi",
+    emailPlaceholder: "📧 E-posta", passwordPlaceholder: "🔒 Şifre", loginBtn: "Giriş Yap",
+    newFarmer: "Yeni çiftçi misiniz?", registerBtn: "Kayıt Ol", demoAccounts: "Demo Hesaplar:",
+    registerTitle: "👨‍🌾 Çiftçi Kaydı", fullnamePlaceholder: "Ad Soyad", phonePlaceholder: "Telefon",
+    goldPackage: "🥇 Altın Paket — Tam AI Otonom", silverPackage: "🥈 Gümüş Paket — Sınırlı AI", bronzePackage: "🥉 Bronz Paket — Manuel Kontrol",
+    backBtn: "← Geri", logoutBtn: "Çıkış", remainingQuota: "Kalan İşlem",
+    tabDashboard: "🏠 Kontrol Paneli", tabParcels: "🗺️ Arazilerim", tabOrders: "📦 Siparişlerim", tabMap: "🗺️ Harita",
+    liveSensorData: "🌡️ Canlı Sensör Verileri", autoOff: "🤖 AI Otonom: KAPALI", autoOn: "🤖 AI Otonom: AÇIK",
+    moistureLabel: "💧 Nem (%)", tempLabel: "🌡️ Sıcaklık (°C)", windLabel: "💨 Rüzgar (km/s)", lightLabel: "☀️ Işık (lux)",
+    aiAnalyzing: "🤖 AI sensörlü analiz yapıyor...", manualIrrigate: "💧 Manuel Sulama", manualFertilize: "🌱 Gübrele",
+    requestAnalysis: "🔬 Analiz İste", liveChart: "📊 Canlı Sensör Grafiği", addParcelBtn: "➕ Yeni Arazi Ekle",
+    noParcelsMsg: "Henüz arazi eklemediniz. Yukarıdan ekleyebilirsiniz.", myOrdersTitle: "📦 Sensör Siparişlerim",
+    noOrdersMsg: "Henüz sipariş bulunmuyor. Arazilerinize sensör siparişi verebilirsiniz.", mapTitle: "🗺️ Arazi ve Sensör Haritası",
+    adminPanelTitle: "👑 Ana Yönetici Paneli", tabFarmers: "👥 Çiftçiler", tabReports: "📊 Raporlar", tabEmail: "📧 E-posta",
+    allPackages: "Tüm Paketler", goldPackageShort: "🥇 Altın", silverPackageShort: "🥈 Gümüş", bronzePackageShort: "🥉 Bronz",
+    allStatus: "Tüm Durumlar", statusPending: "⏳ Bekleyen", statusProcessing: "🔄 İşlemde", statusCompleted: "✅ Tamamlandı", statusRejected: "❌ Reddedildi",
+    generateReportBtn: "📄 Sistem Raporu Oluştur", chartReportBtn: "📊 Grafik Raporu", emailTitle: "📧 Toplu / Bireysel E-posta Gönder",
+    emailAll: "Tüm Çiftçiler", emailGold: "🥇 Altın Paket", emailSilver: "🥈 Gümüş Paket", emailBronze: "🥉 Bronz Paket", emailCustom: "Özel E-posta",
+    customEmailPlaceholder: "ornek@eposta.com", subjectPlaceholder: "Konu", messagePlaceholder: "Mesaj metni...", sendBtn: "📤 Gönder",
+    academicPanelTitle: "🎓 Akademik Yönetici Paneli", tabDataset: "📂 Veri Seti", tabAnalysis: "🔬 Analiz & Rapor", tabStats: "📊 İstatistikler",
+    uploadDatasetTitle: "📤 Veri Seti Yükle", uploadHint: "CSV veya TXT formatında tarım verisi yükleyin.", uploadBtn: "⬆️ Yükle",
+    datasetsTitle: "📁 Yüklenen Veri Setleri", academicAnalysisTitle: "🔬 Akademik Analiz", exportReportBtn: "💾 Raporu İndir",
+    systemStatsTitle: "📊 Sistem Genel İstatistikleri", fieldPanelTitle: "🔧 Saha Yöneticisi Paneli",
+    tabPendingTasks: "⏳ Bekleyen Görevler", tabHistory: "📋 Geçmiş İşlemler", tabBilling: "💰 Faturalandırma", tabFieldMap: "🗺️ Saha Haritası",
+    noPendingTasks: "✅ Bekleyen görev bulunmuyor.", noHistoryMsg: "Henüz tamamlanan işlem yok.", billingTitle: "💰 Çiftçi Ücretlendirme",
+    serviceSensorInstall: "Sensör Kurulumu", serviceMaintenance: "Bakım-Onarım", serviceConsultation: "Danışmanlık", serviceEmergency: "Acil Müdahale", serviceCustom: "Özel Hizmet",
+    amountPlaceholder: "Tutar (TL)", notePlaceholder: "Not (isteğe bağlı)", invoiceBtn: "💳 Fatura Kes", invoiceHistoryTitle: "📜 Fatura Geçmişi",
+    fieldMapTitle: "🗺️ Aktif Sensör ve Arazi Haritası", addParcelModalTitle: "➕ Yeni Arazi Ekle",
+    parcelNamePlaceholder: "Arazi Adı *", cityPlaceholder: "İl *", districtPlaceholder: "İlçe *", adaPlaceholder: "Ada No", parselPlaceholder: "Parsel No", areaPlaceholder: "Alan (dönüm)",
+    cropWheat: "🌾 Buğday", cropCorn: "🌽 Mısır", cropSunflower: "🌻 Ayçiçeği", cropCropCotton: "🌱 Pamuk", cropTomato: "🍅 Domates", cropOther: "🌿 Diğer",
+    saveBtn: "💾 Kaydet", cancelBtn: "İptal", orderDetailTitle: "📦 Sipariş Detayı", closeBtn: "Kapat",
+    searchFarmer: "🔍 Çiftçi ara...", toastSuccess: "Başarılı", toastInfo: "Bilgi", toastWarning: "Uyarı", toastError: "Hata"
+  },
+  en: {
+    appTitle: "AgriEdge PRO++", appSubtitle: "Smart Farm Management System",
+    roleFarmer: "👨‍🌾 Farmer", roleAdmin: "👑 Master Admin", roleAcademic: "🎓 Academic Admin", roleField: "🔧 Field Manager",
+    emailPlaceholder: "📧 Email", passwordPlaceholder: "🔒 Password", loginBtn: "Login",
+    newFarmer: "New farmer?", registerBtn: "Register", demoAccounts: "Demo Accounts:",
+    registerTitle: "👨‍🌾 Farmer Registration", fullnamePlaceholder: "Full Name", phonePlaceholder: "Phone",
+    goldPackage: "🥇 Gold Package — Full AI Autonomous", silverPackage: "🥈 Silver Package — Limited AI", bronzePackage: "🥉 Bronze Package — Manual Control",
+    backBtn: "← Back", logoutBtn: "Logout", remainingQuota: "Remaining Quota",
+    tabDashboard: "🏠 Dashboard", tabParcels: "🗺️ My Lands", tabOrders: "📦 My Orders", tabMap: "🗺️ Map",
+    liveSensorData: "🌡️ Live Sensor Data", autoOff: "🤖 AI Autonomous: OFF", autoOn: "🤖 AI Autonomous: ON",
+    moistureLabel: "💧 Moisture (%)", tempLabel: "🌡️ Temperature (°C)", windLabel: "💨 Wind (km/h)", lightLabel: "☀️ Light (lux)",
+    aiAnalyzing: "🤖 AI analyzing sensor data...", manualIrrigate: "💧 Manual Irrigate", manualFertilize: "🌱 Fertilize",
+    requestAnalysis: "🔬 Request Analysis", liveChart: "📊 Live Sensor Chart", addParcelBtn: "➕ Add New Land",
+    noParcelsMsg: "You haven't added any land yet. You can add from above.", myOrdersTitle: "📦 My Sensor Orders",
+    noOrdersMsg: "No orders yet. You can order sensors for your lands.", mapTitle: "🗺️ Land & Sensor Map",
+    adminPanelTitle: "👑 Master Admin Panel", tabFarmers: "👥 Farmers", tabReports: "📊 Reports", tabEmail: "📧 Email",
+    allPackages: "All Packages", goldPackageShort: "🥇 Gold", silverPackageShort: "🥈 Silver", bronzePackageShort: "🥉 Bronze",
+    allStatus: "All Status", statusPending: "⏳ Pending", statusProcessing: "🔄 Processing", statusCompleted: "✅ Completed", statusRejected: "❌ Rejected",
+    generateReportBtn: "📄 Generate System Report", chartReportBtn: "📊 Chart Report", emailTitle: "📧 Bulk / Individual Email",
+    emailAll: "All Farmers", emailGold: "🥇 Gold Package", emailSilver: "🥈 Silver Package", emailBronze: "🥉 Bronze Package", emailCustom: "Custom Email",
+    customEmailPlaceholder: "example@email.com", subjectPlaceholder: "Subject", messagePlaceholder: "Message...", sendBtn: "📤 Send",
+    academicPanelTitle: "🎓 Academic Admin Panel", tabDataset: "📂 Dataset", tabAnalysis: "🔬 Analysis & Report", tabStats: "📊 Statistics",
+    uploadDatasetTitle: "📤 Upload Dataset", uploadHint: "Upload CSV or TXT agricultural data.", uploadBtn: "⬆️ Upload",
+    datasetsTitle: "📁 Uploaded Datasets", academicAnalysisTitle: "🔬 Academic Analysis", exportReportBtn: "💾 Download Report",
+    systemStatsTitle: "📊 System Statistics", fieldPanelTitle: "🔧 Field Manager Panel",
+    tabPendingTasks: "⏳ Pending Tasks", tabHistory: "📋 History", tabBilling: "💰 Billing", tabFieldMap: "🗺️ Field Map",
+    noPendingTasks: "✅ No pending tasks.", noHistoryMsg: "No completed tasks yet.", billingTitle: "💰 Farmer Billing",
+    serviceSensorInstall: "Sensor Installation", serviceMaintenance: "Maintenance", serviceConsultation: "Consultation", serviceEmergency: "Emergency", serviceCustom: "Custom Service",
+    amountPlaceholder: "Amount (TL)", notePlaceholder: "Note (optional)", invoiceBtn: "💳 Invoice", invoiceHistoryTitle: "📜 Invoice History",
+    fieldMapTitle: "🗺️ Active Sensor & Land Map", addParcelModalTitle: "➕ Add New Land",
+    parcelNamePlaceholder: "Land Name *", cityPlaceholder: "City *", districtPlaceholder: "District *", adaPlaceholder: "Block No", parselPlaceholder: "Parcel No", areaPlaceholder: "Area (acres)",
+    cropWheat: "🌾 Wheat", cropCorn: "🌽 Corn", cropSunflower: "🌻 Sunflower", cropCotton: "🌱 Cotton", cropTomato: "🍅 Tomato", cropOther: "🌿 Other",
+    saveBtn: "💾 Save", cancelBtn: "Cancel", orderDetailTitle: "📦 Order Details", closeBtn: "Close",
+    searchFarmer: "🔍 Search farmer...", toastSuccess: "Success", toastInfo: "Info", toastWarning: "Warning", toastError: "Error"
+  }
+};
+
+let currentLang = localStorage.getItem('appLang') || 'tr';
+
+function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('appLang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key]) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        if (el.hasAttribute('data-i18n-placeholder')) {
+          el.placeholder = translations[lang][key];
+        } else {
+          el.value = translations[lang][key];
+        }
+      } else {
+        el.innerText = translations[lang][key];
+      }
+    }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (translations[lang][key]) el.placeholder = translations[lang][key];
+  });
+  // Dil butonlarını aktifleştir
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    if (btn.getAttribute('data-lang') === lang) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  // Dinamik metinler (toast, alert vb.) için yenileme
+  refreshDynamicTexts();
+}
+
+function refreshDynamicTexts() {
+  // Örneğin auto mode badge
+  if (document.getElementById('autoModeCheckbox')) {
+    const isAuto = document.getElementById('autoModeCheckbox').checked;
+    const badge = document.getElementById('autoModeBadge');
+    if (badge) {
+      if (isAuto) badge.innerText = translations[currentLang].autoOn;
+      else badge.innerText = translations[currentLang].autoOff;
+    }
+  }
+  // Diğer dinamik elementler varsa burada güncellenebilir
+}
+
+// Dil değiştirici eventleri
+document.getElementById('langTr').addEventListener('click', () => setLanguage('tr'));
+document.getElementById('langEn').addEventListener('click', () => setLanguage('en'));
+
+// ==================== VERİ ====================
+let currentUser = null;
 let simulationInterval = null;
-let currentMapView = 'default';
+let chart = null;
+let leafletMap = null;
+let activityLog = [];
 
-// Parsel verileri
-const parcels = [
-  {id: 0, name: "Yılmaz Tarlası", area: "1250 m²", city: "İzmir", district: "Bornova", ada: "123", parsel: "45", lat: 38.4623, lng: 27.1011, status: "active"},
-  {id: 1, name: "Demir Bahçesi", area: "800 m²", city: "Manisa", district: "Turgutlu", ada: "234", parsel: "12", lat: 38.5015, lng: 27.7042, status: "active"},
-  {id: 2, name: "Kaya Bostanı", area: "450 m²", city: "Aydın", district: "Söke", ada: "567", parsel: "78", lat: 37.7515, lng: 27.4102, status: "inactive"}
-];
+const CROP_ICONS = { wheat:'🌾', corn:'🌽', sunflower:'🌻', cotton:'🌱', tomato:'🍅', other:'🌿' };
+const PKG_BADGE = { gold:'<span class="badge badge-gold">🥇 Altın Paket</span>', silver:'<span class="badge badge-silver">🥈 Gümüş Paket</span>', bronze:'<span class="badge badge-bronze">🥉 Bronz Paket</span>' };
 
-const sensorData = [
-  {name:"Nem Sensörü 1", lat:38.4625, lng:27.1015, moisture:50, temp:22, humidity:65, status:"İyi"},
-  {name:"Nem Sensörü 2", lat:38.4620, lng:27.1008, moisture:20, temp:25, humidity:45, status:"Kritik"},
-  {name:"Nem Sensörü 3", lat:38.4630, lng:27.1020, moisture:75, temp:20, humidity:70, status:"İyi"},
-  {name:"Bahçe Sensör", lat:38.5017, lng:27.7045, moisture:35, temp:23, humidity:55, status:"Orta"}
-];
-
-const diseaseDatabase = [
-  {name:"Yaprak Lekesi", symptoms:"Kahverengi lekeler, yaprakta delikler", advice:"Bakır bazlı ilaçlama önerilir. Sulama sıklığını azaltın.", severity:"medium"},
-  {name:"Mildiyö", symptoms:"Unsu kaplama, yaprak sararması", advice:"Fungusit uygulayın. Havalandırmayı arttırın.", severity:"high"},
-  {name:"Kök Çürümesi", symptoms:"Solgun yapraklar, kökte siyahlanma", advice:"Drenajı kontrol edin. Toprak pH'ını test edin.", severity:"critical"},
-  {name:"Afit", symptoms:"Küçük yeşil/siyah böcekler, yaprak kıvrılması", advice:"Neem yağı veya biyolojik mücadele.", severity:"low"},
-  {name:"Sağlıklı", symptoms:"Yeşil yapraklar, güçlü gövde", advice:"Tebrikler! Bitkiniz sağlıklı.", severity:"low"}
-];
-
-const weatherConditions = [
-  {desc: "Güneşli", temp: 24, wind: 12, humidity: 55},
-  {desc: "Parçalı Bulutlu", temp: 22, wind: 18, humidity: 60},
-  {desc: "Bulutlu", temp: 19, wind: 15, humidity: 70},
-  {desc: "Hafif Yağmurlu", temp: 16, wind: 22, humidity: 85}
-];
-
-// Giriş Fonksiyonları
-function enterFarmer(){
-  hideAllPanels();
-  document.getElementById('farmerPanel').classList.remove('hidden');
-  if(!chart) initChart();
-  if(!map) initMap();
-  startSimulation();
-}
-
-function showAdminLogin(){
-  hideAllPanels();
-  document.getElementById('adminLogin').classList.remove('hidden');
-}
-
-function backLogin(){
-  hideAllPanels();
-  document.getElementById('login').classList.remove('hidden');
-  document.getElementById('adminUser').value = '';
-  document.getElementById('adminPass').value = '';
-  document.getElementById('adminError').innerText = '';
-}
-
-function enterAdmin(){
-  const user = document.getElementById('adminUser').value.trim();
-  const pass = document.getElementById('adminPass').value;
-  if(user === "agriedge" && pass === "1234"){
-    hideAllPanels();
-    document.getElementById('adminPanel').classList.remove('hidden');
-  } else {
-    document.getElementById('adminError').innerText = "Hatalı kullanıcı adı veya şifre!";
+function initData() {
+  if (!localStorage.getItem('agriedge_v2')) {
+    const farmers = [
+      { id:'f1', name:'Altın Çiftçi', email:'altin@ciftci.com', password:'1234', phone:'5551112233', country:'TR', package:'gold', quota:1000, parcels:[], orders:[], activities:[], autoMode:false, createdAt:new Date().toISOString() },
+      { id:'f2', name:'Gümüş Çiftçi', email:'gumus@ciftci.com', password:'1234', phone:'5554445566', country:'TR', package:'silver', quota:1000, parcels:[], orders:[], activities:[], autoMode:false, createdAt:new Date().toISOString() },
+      { id:'f3', name:'Bronz Çiftçi', email:'bronz@ciftci.com', password:'1234', phone:'5557778899', country:'TR', package:'bronze', quota:1000, parcels:[], orders:[], activities:[], autoMode:false, createdAt:new Date().toISOString() }
+    ];
+    const admins = [{ id:'a1', name:'Ana Yönetici', email:'admin@agriedge.com', password:'admin123', role:'admin' }];
+    const academics = [{ id:'ac1', name:'Prof. Dr. Ahmet', email:'akademik@uni.edu', password:'akademik123', role:'academic', datasets:[] }];
+    const fieldManagers = [{ id:'fm1', name:'Ali Saha', email:'saha@agriedge.com', password:'saha123', role:'field', history:[], billings:[] }];
+    localStorage.setItem('agriedge_users', JSON.stringify({ farmers, admins, academics, fieldManagers }));
+    localStorage.setItem('agriedge_sensors', JSON.stringify([]));
+    localStorage.setItem('agriedge_orders', JSON.stringify([]));
+    localStorage.setItem('agriedge_v2', 'true');
   }
 }
 
-function hideAllPanels(){
-  ['login', 'adminLogin', 'farmerPanel', 'adminPanel'].forEach(id => {
-    document.getElementById(id).classList.add('hidden');
-  });
+function getFarmers() { return JSON.parse(localStorage.getItem('agriedge_users')).farmers; }
+function getAdmins() { return JSON.parse(localStorage.getItem('agriedge_users')).admins; }
+function getAcademics() { return JSON.parse(localStorage.getItem('agriedge_users')).academics; }
+function getFieldManagers() { return JSON.parse(localStorage.getItem('agriedge_users')).fieldManagers; }
+function getSensors() { return JSON.parse(localStorage.getItem('agriedge_sensors')) || []; }
+function getOrders() { return JSON.parse(localStorage.getItem('agriedge_orders')) || []; }
+function saveAllUsers(farmers, admins, academics, fieldManagers) { localStorage.setItem('agriedge_users', JSON.stringify({ farmers, admins, academics, fieldManagers })); }
+function saveSensors(s) { localStorage.setItem('agriedge_sensors', JSON.stringify(s)); }
+function saveOrders(o) { localStorage.setItem('agriedge_orders', JSON.stringify(o)); }
+
+// ==================== GİRİŞ ====================
+function handleLogin() {
+  const role = document.getElementById('roleSelect').value;
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPassword').value;
+  let user = null;
+  if (role === 'farmer') user = getFarmers().find(f => f.email === email && f.password === pwd);
+  else if (role === 'admin') user = getAdmins().find(a => a.email === email && a.password === pwd);
+  else if (role === 'academic') user = getAcademics().find(a => a.email === email && a.password === pwd);
+  else if (role === 'field') user = getFieldManagers().find(f => f.email === email && f.password === pwd);
+  if (user) {
+    currentUser = { ...user, role };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    showPanelByRole();
+  } else { const el = document.getElementById('loginError'); el.innerText = '❌ E-posta veya şifre hatalı!'; el.classList.remove('hidden'); }
 }
 
-function logout(){
-  if(simulationInterval){
-    clearInterval(simulationInterval);
-    simulationInterval = null;
-  }
-  location.reload();
+function showPanelByRole() {
+  ['loginScreen','registerScreen','farmerPanel','adminPanel','academicPanel','fieldPanel'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  if (currentUser.role === 'farmer') { document.getElementById('farmerPanel').classList.remove('hidden'); initFarmerPanel(); }
+  else if (currentUser.role === 'admin') { document.getElementById('adminPanel').classList.remove('hidden'); initAdminPanel(); }
+  else if (currentUser.role === 'academic') { document.getElementById('academicPanel').classList.remove('hidden'); initAcademicPanel(); }
+  else if (currentUser.role === 'field') { document.getElementById('fieldPanel').classList.remove('hidden'); initFieldPanel(); }
 }
 
-// Parsel Seçimi
-function selectParcel(index){
-  document.querySelectorAll('.parcel-item').forEach((item, i) => {
-    item.classList.toggle('active', i === index);
-  });
+function logout() { if (simulationInterval) clearInterval(simulationInterval); if (leafletMap) leafletMap.remove(); localStorage.removeItem('currentUser'); currentUser = null; document.getElementById('loginEmail').value = ''; document.getElementById('loginPassword').value = ''; document.getElementById('loginError').classList.add('hidden'); document.querySelectorAll('#farmerPanel, #adminPanel, #academicPanel, #fieldPanel').forEach(el => el.classList.add('hidden')); document.getElementById('loginScreen').classList.remove('hidden'); }
 
-  const parcel = parcels[index];
-  if(parcel && map){
-    map.setView([parcel.lat, parcel.lng], 16);
-
-    if(parcelLayer) map.removeLayer(parcelLayer);
-
-    parcelLayer = L.polygon([
-      [parcel.lat - 0.002, parcel.lng - 0.003],
-      [parcel.lat + 0.002, parcel.lng - 0.003],
-      [parcel.lat + 0.002, parcel.lng + 0.003],
-      [parcel.lat - 0.002, parcel.lng + 0.003]
-    ], {
-      color: '#2ecc71',
-      fillColor: '#2ecc71',
-      fillOpacity: 0.3,
-      weight: 3
-    }).addTo(map);
-
-    parcelLayer.bindPopup(`
-      <strong style="color:#2ecc71;">${parcel.name}</strong><br>
-      <hr style="margin:8px 0;">
-      <b>Alan:</b> ${parcel.area}<br>
-      <b>Konum:</b> ${parcel.city}, ${parcel.district}<br>
-      <b>Ada/Parsel:</b> ${parcel.ada}/${parcel.parsel}
-    `).openPopup();
-
-    loadSensors();
-  }
+// ==================== KAYIT ====================
+function showRegister() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('registerScreen').classList.remove('hidden'); }
+function backToLogin() { document.getElementById('registerScreen').classList.add('hidden'); document.getElementById('loginScreen').classList.remove('hidden'); }
+function registerFarmer() {
+  const name = document.getElementById('regName').value.trim(); const email = document.getElementById('regEmail').value.trim(); const phone = document.getElementById('regPhone').value.trim(); const country = document.getElementById('regCountry').value; const pkg = document.getElementById('regPackage').value; const pwd = document.getElementById('regPassword').value; const errEl = document.getElementById('registerError');
+  if (!name || !email || !pwd) { errEl.innerText='Ad, e-posta ve şifre zorunludur.'; errEl.classList.remove('hidden'); return; }
+  let farmers = getFarmers(); if (farmers.find(f => f.email === email)) { errEl.innerText='Bu e-posta zaten kayıtlı.'; errEl.classList.remove('hidden'); return; }
+  errEl.classList.add('hidden');
+  const newFarmer = { id:'f'+Date.now(), name, email, password:pwd, phone, country, package:pkg, quota:1000, parcels:[], orders:[], activities:[], autoMode:false, createdAt:new Date().toISOString() };
+  farmers.push(newFarmer);
+  saveAllUsers(farmers, getAdmins(), getAcademics(), getFieldManagers());
+  alert('✅ Kayıt başarılı! Giriş yapabilirsiniz.'); backToLogin();
 }
 
-// Harita Fonksiyonları
-function initMap(){
-  try {
-    if(map) {
-      map.remove();
-      map = null;
-    }
-    map = L.map('mapContainer').setView([38.5, 27.2], 9);
+// ==================== HELPER TABS ====================
+function showFarmerTab(tab) { document.querySelectorAll('#farmerPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('farmer'+tab).classList.add('active'); if (tab === 'Map') initLeafletMap(); if (tab === 'Orders') renderFarmerOrders(); if (tab === 'Parcels') renderFarmerParcels(); }
+function showAdminTab(tab) { document.querySelectorAll('#adminPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('admin'+tab).classList.add('active'); if (tab === 'Farmers') renderAdminFarmers(); if (tab === 'Orders') renderAdminOrders(); document.getElementById('emailTarget').onchange = function() { document.getElementById('customEmailWrap').classList.toggle('hidden', this.value !== 'custom'); }; }
+function showAcademicTab(tab) { document.querySelectorAll('#academicPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('academic'+tab).classList.add('active'); if (tab === 'Stats') renderAcademicStats(); }
+function showFieldTab(tab) { document.querySelectorAll('#fieldPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('field'+tab).classList.add('active'); if (tab === 'FieldMap') initFieldLeafletMap(); if (tab === 'History') renderFieldHistory(); if (tab === 'Billing') renderBillingHistory(); }
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
+// ==================== FARMER ====================
+let sensorState = { moisture:45, temp:24, wind:12, light:45000 };
+function initFarmerPanel() { document.getElementById('farmerName').innerText = currentUser.name; document.getElementById('farmerPackageBadge').innerHTML = PKG_BADGE[currentUser.package] || ''; document.getElementById('farmerQuota').innerText = currentUser.quota; const isGold = currentUser.package === 'gold'; document.getElementById('autoModeLabel').style.display = isGold ? 'flex' : 'none'; document.getElementById('autoModeCheckbox').checked = !!currentUser.autoMode; updateAutoModeBadge(); document.getElementById('manualIrrigateBtn').style.display = isGold ? 'none' : 'inline-block'; document.getElementById('manualFertilizeBtn').style.display = isGold ? 'none' : 'inline-block'; activityLog = currentUser.activities || []; renderActivityLog(); renderFarmerParcels(); renderFarmerOrders(); startSensorSimulation(); initChart(); document.querySelectorAll('#farmerPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('farmerDashboard').classList.add('active'); }
+function startSensorSimulation() { if (simulationInterval) clearInterval(simulationInterval); const update = () => { sensorState.moisture += (Math.random() - 0.5) * 5; sensorState.moisture = Math.min(100, Math.max(5, sensorState.moisture)); sensorState.temp += (Math.random() - 0.5) * 2; sensorState.temp = Math.min(45, Math.max(0, sensorState.temp)); sensorState.wind += (Math.random() - 0.5) * 4; sensorState.wind = Math.min(80, Math.max(0, sensorState.wind)); sensorState.light += (Math.random() - 0.5) * 5000; sensorState.light = Math.min(100000, Math.max(0, sensorState.light)); document.getElementById('sensorMoisture').innerText = Math.floor(sensorState.moisture); document.getElementById('sensorTemp').innerText = Math.floor(sensorState.temp); document.getElementById('sensorWind').innerText = Math.floor(sensorState.wind); document.getElementById('sensorLight').innerText = Math.floor(sensorState.light/1000)+'k'; document.getElementById('moistureBar').style.width = Math.floor(sensorState.moisture)+'%'; const auto = document.getElementById('autoModeCheckbox').checked && currentUser.package === 'gold'; let decision = '', alertClass = 'info', logEntry = ''; if (sensorState.moisture < 25) { if (auto) { decision = '🚰 <b>OTOMATİK SULAMA BAŞLATILDI</b> — Nem kritik!'; alertClass = 'warning'; sensorState.moisture = Math.min(100, sensorState.moisture + 18); logEntry = '🚰 Otomatik sulama devreye girdi'; } else { decision = '⚠️ <b>Nem çok düşük!</b> Sulama önerilir.'; alertClass = 'warning'; } } else if (sensorState.moisture > 85) { decision = '⚠️ <b>Fazla nem!</b> Drenaj kontrolü.'; alertClass = 'warning'; } else if (sensorState.temp > 38) { decision = '🌡️ <b>Yüksek sıcaklık!</b> Serinletme önerisi.'; alertClass = 'warning'; } else if (sensorState.wind > 60) { decision = '💨 <b>Fırtına uyarısı!</b> Ekipmanları güvenceye alın.'; alertClass = 'error'; } else { decision = '✅ <b>Tüm değerler ideal.</b> İşlem gerekmez.'; alertClass = 'success'; } const aiEl = document.getElementById('aiDecision'); aiEl.innerHTML = '🤖 AI Kararı: ' + decision; aiEl.className = 'alert ' + alertClass; if (logEntry) addActivity(logEntry); if (chart) { const time = new Date().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit',second:'2-digit'}); chart.data.labels.push(time); chart.data.datasets[0].data.push(Math.floor(sensorState.moisture)); chart.data.datasets[1].data.push(Math.floor(sensorState.temp)); if (chart.data.labels.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); chart.data.datasets[1].data.shift(); } chart.update('none'); } if (currentUser.quota > 0) { currentUser.quota--; document.getElementById('farmerQuota').innerText = currentUser.quota; updateFarmerInStorage(); } }; simulationInterval = setInterval(update, 4000); update(); }
+function initChart() { const ctx = document.getElementById('farmerChart').getContext('2d'); if (chart) chart.destroy(); chart = new Chart(ctx, { type: 'line', data: { labels: [], datasets: [{ label: 'Nem (%)', data: [], borderColor: '#2c7a4d', backgroundColor: 'rgba(44,122,77,0.1)', tension: 0.4, fill: true }, { label: 'Sıcaklık (°C)', data: [], borderColor: '#e67e22', backgroundColor: 'rgba(230,126,34,0.1)', tension: 0.4, fill: true }] }, options: { responsive: true, animation: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: false } } } }); }
+function toggleAutoMode() { if (currentUser.package !== 'gold') { document.getElementById('autoModeCheckbox').checked = false; alert('Bu özellik sadece Altın Paket kullanıcılarına aittir.'); return; } currentUser.autoMode = document.getElementById('autoModeCheckbox').checked; updateAutoModeBadge(); updateFarmerInStorage(); addActivity(currentUser.autoMode ? '🤖 AI Otonom mod AKTİF' : '🔴 AI Otonom mod KAPALI'); }
+function updateAutoModeBadge() { const badge = document.getElementById('autoModeBadge'); if (!badge) return; if (currentUser.package !== 'gold') { badge.textContent = '🔒 Altın Paket gerekli'; badge.className = 'auto-mode-badge auto-off'; return; } if (document.getElementById('autoModeCheckbox').checked) { badge.innerText = translations[currentLang].autoOn; badge.className = 'auto-mode-badge auto-on'; } else { badge.innerText = translations[currentLang].autoOff; badge.className = 'auto-mode-badge auto-off'; } }
+function manualIrrigate() { if (currentUser.package === 'gold') { alert('Altın paket için otomatik mod mevcut!'); return; } sensorState.moisture = Math.min(100, sensorState.moisture + 20); document.getElementById('sensorMoisture').innerText = Math.floor(sensorState.moisture); document.getElementById('moistureBar').style.width = Math.floor(sensorState.moisture)+'%'; addActivity('💧 Manuel sulama yapıldı'); showToast(translations[currentLang].manualIrrigate, 'success'); }
+function manualFertilize() { addActivity('🌱 Manuel gübreleme yapıldı'); showToast(translations[currentLang].manualFertilize, 'success'); }
+function requestAnalysis() { addActivity('🔬 Analiz talebi gönderildi'); showToast(translations[currentLang].requestAnalysis, 'info'); }
+function addActivity(text) { const entry = { time: new Date().toLocaleTimeString('tr-TR'), text }; activityLog.unshift(entry); if (activityLog.length > 20) activityLog.length = 20; currentUser.activities = activityLog; updateFarmerInStorage(); renderActivityLog(); }
+function renderActivityLog() { const container = document.getElementById('activityLog'); if (!container) return; if (activityLog.length === 0) { container.innerHTML = '<p style="color:#999;font-size:13px;">Henüz aktivite yok.</p>'; return; } container.innerHTML = activityLog.map(a => `<div style="padding:4px 0;border-bottom:1px solid #f0f4f8;"><span style="color:#999;">${a.time}</span> — ${a.text}</div>`).join(''); }
+function renderFarmerParcels() { const container = document.getElementById('parcelsList'); const noEl = document.getElementById('noParcels'); if (!currentUser.parcels) currentUser.parcels = []; if (currentUser.parcels.length === 0) { container.innerHTML = ''; noEl.classList.remove('hidden'); return; } noEl.classList.add('hidden'); container.innerHTML = currentUser.parcels.map(p => `<div class="parcel-card"><h4>${CROP_ICONS[p.crop]||'🌿'} ${p.name}</h4><p style="color:#666;font-size:13px;">📍 ${p.city}, ${p.district}</p><p style="color:#666;font-size:13px;">Ada: ${p.ada||'-'} | Parsel: ${p.parsel||'-'} | ${p.area||'?'} dönüm</p><div class="flex" style="margin-top:12px;gap:8px;"><button class="secondary" style="padding:7px 14px;font-size:13px;" onclick="orderSensors('${p.id}')">📡 Sipariş Ver</button><button class="danger" style="padding:7px 14px;font-size:13px;" onclick="deleteParcel('${p.id}')">🗑️</button></div></div>`).join(''); }
+function deleteParcel(pid) { if (!confirm('Arazi silinecek, emin misiniz?')) return; currentUser.parcels = currentUser.parcels.filter(p => p.id !== pid); updateFarmerInStorage(); renderFarmerParcels(); }
+function showAddParcelModal() { document.getElementById('addParcelModal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('addParcelModal').classList.add('hidden'); }
+function addParcel() { const name = document.getElementById('parcelName').value.trim(); const city = document.getElementById('parcelCity').value.trim(); const district = document.getElementById('parcelDistrict').value.trim(); const ada = document.getElementById('parcelAda').value.trim(); const parsel = document.getElementById('parcelParsel').value.trim(); const area = document.getElementById('parcelArea').value; const crop = document.getElementById('parcelCrop').value; if (!name || !city || !district) { alert('Ad, il ve ilçe zorunludur!'); return; } const newParcel = { id:'p'+Date.now(), name, city, district, ada, parsel, area, crop, lat: 37 + Math.random()*5, lng: 29 + Math.random()*10, createdAt: new Date().toISOString() }; if (!currentUser.parcels) currentUser.parcels = []; currentUser.parcels.push(newParcel); updateFarmerInStorage(); renderFarmerParcels(); closeModal(); document.querySelectorAll('#addParcelModal input, #addParcelModal select').forEach(el => { if(el.id !== 'parcelCrop') el.value = ''; }); addActivity('🗺️ Yeni arazi eklendi: '+name); showToast(translations[currentLang].saveBtn, 'success'); }
+function renderFarmerOrders() { const orders = getOrders().filter(o => o.farmerId === currentUser.id); const container = document.getElementById('ordersList'); const noEl = document.getElementById('noOrders'); if (orders.length === 0) { container.innerHTML = ''; noEl.classList.remove('hidden'); return; } noEl.classList.add('hidden'); const statusLabel = { pending:'⏳ Bekleniyor', processing:'🔄 İşlemde', completed:'✅ Tamamlandı', rejected:'❌ Reddedildi' }; container.innerHTML = orders.map(o => `<div class="order-card"><div><b>Sipariş #${o.id.slice(-6)}</b><br><span style="font-size:13px;color:#666;">${new Date(o.createdAt).toLocaleDateString('tr-TR')} — ${o.sensorCount} sensör</span></div><span class="badge badge-${o.status}">${statusLabel[o.status]||o.status}</span></div>`).join(''); }
+function orderSensors(parcelId) { const count = prompt('Kaç sensör sipariş etmek istiyorsunuz?', '2'); if (!count || isNaN(count) || parseInt(count) < 1) return; const orders = getOrders(); const parcel = (currentUser.parcels||[]).find(p => p.id === parcelId); const newOrder = { id:'ord'+Date.now(), farmerId:currentUser.id, farmerName:currentUser.name, parcelId, parcelName:parcel?.name||'-', sensorCount:parseInt(count), status:'pending', createdAt:new Date().toISOString() }; orders.push(newOrder); saveOrders(orders); updateFarmerInStorage(); addActivity(`📡 ${count} sensör sipariş edildi`); showToast(translations[currentLang].saveBtn, 'success'); renderFarmerOrders(); }
+function updateFarmerInStorage() { let farmers = getFarmers(); const idx = farmers.findIndex(f => f.id === currentUser.id); if (idx !== -1) farmers[idx] = currentUser; saveAllUsers(farmers, getAdmins(), getAcademics(), getFieldManagers()); }
+function initLeafletMap() { if (leafletMap) leafletMap.remove(); const mapEl = document.getElementById('leafletMap'); if (!mapEl) return; leafletMap = L.map('leafletMap').setView([39.0, 35.0], 6); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leafletMap); const parcels = currentUser.parcels || []; const sensors = getSensors().filter(s => s.farmerId === currentUser.id); parcels.forEach(p => { L.marker([p.lat, p.lng], { icon: L.divIcon({ html:'🌾', iconSize:[30,30], className:'' }) }).addTo(leafletMap).bindPopup(`<b>${p.name}</b><br>${p.city}, ${p.district}`); }); sensors.forEach(s => { L.marker([s.lat, s.lng], { icon: L.divIcon({ html:'📡', iconSize:[30,30], className:'' }) }).addTo(leafletMap).bindPopup(`<b>${s.name}</b><br>Durum: ${s.status}`); }); if (parcels.length > 0) leafletMap.setView([parcels[0].lat, parcels[0].lng], 9); }
 
-    // Tüm parselleri haritaya ekle
-    parcels.forEach(p => {
-      const color = p.status === 'active' ? '#2ecc71' : '#95a5a6';
-      const poly = L.polygon([
-        [p.lat - 0.002, p.lng - 0.003],
-        [p.lat + 0.002, p.lng - 0.003],
-        [p.lat + 0.002, p.lng + 0.003],
-        [p.lat - 0.002, p.lng + 0.003]
-      ], {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.2,
-        weight: 2
-      }).addTo(map);
+// ==================== ADMIN ====================
+function initAdminPanel() { renderAdminStats(); renderAdminFarmers(); renderAdminOrders(); document.getElementById('emailTarget').onchange = function() { document.getElementById('customEmailWrap').classList.toggle('hidden', this.value !== 'custom'); }; document.querySelectorAll('#adminPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('adminFarmers').classList.add('active'); }
+function renderAdminStats() { const farmers = getFarmers(); const orders = getOrders(); const sensors = getSensors(); document.getElementById('adminStats').innerHTML = `<div class="stat-card"><div class="stat-value">${farmers.length}</div><div class="stat-label">Toplam Çiftçi</div></div><div class="stat-card"><div class="stat-value">${farmers.filter(f=>f.package==='gold').length}</div><div class="stat-label">🥇 Altın</div></div><div class="stat-card"><div class="stat-value">${orders.filter(o=>o.status==='pending').length}</div><div class="stat-label">⏳ Bekleyen Sipariş</div></div><div class="stat-card"><div class="stat-value">${sensors.length}</div><div class="stat-label">📡 Aktif Sensör</div></div><div class="stat-card"><div class="stat-value">${farmers.reduce((a,f)=>a+f.parcels.length,0)}</div><div class="stat-label">🗺️ Toplam Arazi</div></div>`; }
+let allFarmers = [];
+function renderAdminFarmers(list) { allFarmers = list || getFarmers(); if (allFarmers.length === 0) { document.getElementById('adminFarmersTable').innerHTML = '<div class="alert info">Kayıtlı çiftçi yok.</div>'; return; } let html = `<td><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Ülke</th><th>Paket</th><th>Arazi</th><th>Kota</th><th>Kayıt</th><th>İşlem</th></tr></thead><tbody>`; allFarmers.forEach(f => { html += `<tr><td><b>${f.name}</b></td><td>${f.email}</td><td>${f.country}</td><td>${PKG_BADGE[f.package]||f.package}</td><td>${f.parcels.length}</td><td>${f.quota}</td><td style="font-size:12px;">${new Date(f.createdAt).toLocaleDateString('tr-TR')}</td><td><button class="secondary" style="padding:5px 10px;font-size:12px;" onclick="changeFarmerPackage('${f.id}')">Paket</button> <button class="danger" style="padding:5px 10px;font-size:12px;" onclick="deleteFarmer('${f.id}')">Sil</button></td></tr>`; }); html += '</tbody></table>'; document.getElementById('adminFarmersTable').innerHTML = html; }
+function filterFarmers() { const search = document.getElementById('farmerSearch').value.toLowerCase(); const pkg = document.getElementById('farmerFilterPkg').value; let farmers = getFarmers(); if (pkg) farmers = farmers.filter(f => f.package === pkg); if (search) farmers = farmers.filter(f => f.name.toLowerCase().includes(search)); renderAdminFarmers(farmers); }
+function changeFarmerPackage(fid) { const newPkg = prompt('Yeni paket (gold/silver/bronze):', 'gold'); if (!['gold','silver','bronze'].includes(newPkg)) { alert('Geçersiz paket!'); return; } let farmers = getFarmers(); const f = farmers.find(x => x.id === fid); if (f) { f.package = newPkg; saveAllUsers(farmers, getAdmins(), getAcademics(), getFieldManagers()); renderAdminFarmers(); renderAdminStats(); } }
+function deleteFarmer(fid) { if (!confirm('Çiftçi ve tüm veriler silinecek. Emin misiniz?')) return; let farmers = getFarmers().filter(f => f.id !== fid); saveAllUsers(farmers, getAdmins(), getAcademics(), getFieldManagers()); renderAdminFarmers(); renderAdminStats(); }
+function renderAdminOrders(list) { const orders = list || getOrders(); if (orders.length === 0) { document.getElementById('adminOrdersTable').innerHTML = '<div class="alert info">Sipariş yok.</div>'; return; } const statusBadge = { pending:'badge-pending ⏳ Bekliyor', processing:'badge-processing 🔄 İşlemde', completed:'badge-completed ✅ Tamamlandı', rejected:'badge-rejected ❌ Reddedildi' }; let html = `<table><thead><tr><th>#</th><th>Çiftçi</th><th>Arazi</th><th>Sensör</th><th>Tarih</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>`; orders.forEach(o => { const sb = statusBadge[o.status] || o.status; const [cls, text] = sb.split(' '); html += `<tr><td style="font-family:monospace;">${o.id.slice(-6)}</td><td>${o.farmerName}</td><td>${o.parcelName||'-'}</td><td>${o.sensorCount}</td><td style="font-size:12px;">${new Date(o.createdAt).toLocaleDateString('tr-TR')}</td><td><span class="badge ${cls}">${text}</span></td><td>${o.status === 'pending' ? `<button style="padding:5px 10px;font-size:12px;" onclick="approveOrder('${o.id}')">✅ Onayla</button> <button class="danger" style="padding:5px 10px;font-size:12px;" onclick="rejectOrder('${o.id}')">❌ Reddet</button>` : '-'}</td></tr>`; }); html += '</tbody></table>'; document.getElementById('adminOrdersTable').innerHTML = html; }
+function filterOrders() { const status = document.getElementById('orderStatusFilter').value; let orders = getOrders(); if (status) orders = orders.filter(o => o.status === status); renderAdminOrders(orders); }
+function approveOrder(oid) { const orders = getOrders(); const o = orders.find(x => x.id === oid); if (o) { o.status = 'processing'; saveOrders(orders); } renderAdminOrders(); renderAdminStats(); showToast(translations[currentLang].toastSuccess, 'success'); }
+function rejectOrder(oid) { const orders = getOrders(); const o = orders.find(x => x.id === oid); if (o) { o.status = 'rejected'; saveOrders(orders); } renderAdminOrders(); renderAdminStats(); }
+function generateReport() { const farmers = getFarmers(); const orders = getOrders(); const sensors = getSensors(); const d = new Date().toLocaleDateString('tr-TR'); document.getElementById('reportOutput').innerHTML = `<div class="card"><h3>📄 AgriEdge PRO++ Sistem Raporu — ${d}</h3> <table> <tr><th>Metrik</th><th>Değer</th></tr> <tr><td>Toplam Çiftçi</td><td><b>${farmers.length}</b></td></tr> <tr><td>🥇 Altın Paket</td><td><b>${farmers.filter(f=>f.package==='gold').length}</b></td></tr> <tr><td>🥈 Gümüş Paket</td><td><b>${farmers.filter(f=>f.package==='silver').length}</b></td></tr> <tr><td>🥉 Bronz Paket</td><td><b>${farmers.filter(f=>f.package==='bronze').length}</b></td></tr> <tr><td>Toplam Arazi</td><td><b>${farmers.reduce((a,f)=>a+f.parcels.length,0)}</b></td></tr> <tr><td>Toplam Sipariş</td><td><b>${orders.length}</b></td></tr> <tr><td>Bekleyen Sipariş</td><td><b>${orders.filter(o=>o.status==='pending').length}</b></td></tr> <tr><td>Tamamlanan Sipariş</td><td><b>${orders.filter(o=>o.status==='completed').length}</b></td></tr> <tr><td>Aktif Sensör</td><td><b>${sensors.length}</b></td></tr> </table> </div>`; }
+function generateChartReport() { const farmers = getFarmers(); const canvas = document.getElementById('adminChart'); canvas.style.display = 'block'; const ctx = canvas.getContext('2d'); if (window._adminChart) window._adminChart.destroy(); window._adminChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['🥇 Altın', '🥈 Gümüş', '🥉 Bronz'], datasets: [{ data: [farmers.filter(f=>f.package==='gold').length, farmers.filter(f=>f.package==='silver').length, farmers.filter(f=>f.package==='bronze').length], backgroundColor: ['#fbbf24','#94a3b8','#d97706'] }] }, options: { responsive: true, plugins: { legend: { position: 'bottom' } } } }); }
+function sendEmailSimulate() { const target = document.getElementById('emailTarget').value; const subject = document.getElementById('emailSubject').value; const msg = document.getElementById('emailMsg').value; if (!subject || !msg) { alert('Konu ve mesaj zorunludur.'); return; } let recipients = []; if (target === 'all') recipients = getFarmers().map(f => f.email); else if (target === 'custom') recipients = [document.getElementById('emailTo').value]; else recipients = getFarmers().filter(f => f.package === target).map(f => f.email); document.getElementById('emailStatus').innerHTML = `<div class="alert success">✅ ${recipients.length} alıcıya e-posta gönderildi (simülasyon).<br><small>${recipients.join(', ')}</small></div>`; }
 
-      poly.bindPopup(`<b>${p.name}</b><br>${p.city}, ${p.district}`);
-    });
+// ==================== ACADEMIC ====================
+function initAcademicPanel() { renderUploadedDocs(); document.querySelectorAll('#academicPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('academicData').classList.add('active'); }
+function renderUploadedDocs() { const datasets = currentUser.datasets || []; const container = document.getElementById('uploadedDocs'); if (datasets.length === 0) { container.innerHTML = '<p style="color:#999;">Henüz veri seti yüklenmedi.</p>'; return; } container.innerHTML = datasets.map((d,i) => `<div style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #eee;"><span>📄 ${d.name}</span><button class="danger" style="padding:5px 10px;font-size:12px;" onclick="deleteDataset(${i})">Sil</button></div>`).join(''); }
+function deleteDataset(idx) { if (!confirm('Veri seti silinecek?')) return; currentUser.datasets.splice(idx,1); const academics = getAcademics(); const i = academics.findIndex(a => a.id === currentUser.id); if (i !== -1) academics[i] = currentUser; saveAllUsers(getFarmers(), getAdmins(), academics, getFieldManagers()); renderUploadedDocs(); }
+function uploadDataset() { const fileInput = document.getElementById('docUpload'); if (!fileInput.files[0]) { alert('Lütfen bir dosya seçin.'); return; } const file = fileInput.files[0]; const reader = new FileReader(); reader.onload = e => { if (!currentUser.datasets) currentUser.datasets = []; currentUser.datasets.push({ name: file.name, size: file.size, content: e.target.result, uploadedAt: new Date().toISOString() }); const academics = getAcademics(); const idx = academics.findIndex(a => a.id === currentUser.id); if (idx !== -1) academics[idx] = currentUser; saveAllUsers(getFarmers(), getAdmins(), academics, getFieldManagers()); renderUploadedDocs(); document.getElementById('uploadStatus').innerHTML = '<div class="alert success">✅ Veri seti yüklendi.</div>'; setTimeout(() => document.getElementById('uploadStatus').innerHTML = '', 3000); }; reader.readAsText(file); }
+function generateAcademicReport() { const sensors = getSensors(); const farmers = getFarmers(); const mockMoisture = Math.floor(Math.random()*30+35); const mockYield = (Math.random()*2+3).toFixed(2); document.getElementById('academicReport').innerHTML = `<div style="background:#f8fafc;padding:20px;border-radius:12px;"><h3>📝 Akademik Analiz Raporu</h3><p>${new Date().toLocaleDateString('tr-TR')}</p><h4>🌡️ Sensör Verileri Özeti</h4><ul><li>Aktif sensör: <b>${sensors.length}</b></li><li>Ortalama nem: <b>${mockMoisture}%</b></li><li>Analiz edilen çiftçi: <b>${farmers.length}</b></li><li>Toplam arazi: <b>${farmers.reduce((a,f)=>a+f.parcels.length,0)} parsel</b></li></ul><h4>🌾 Verim Tahmini</h4><p>Simüle tahmini verim: <b>${mockYield} ton/dönüm</b></p><h4>💡 Öneriler</h4><ul><li>Nem %35 altına düştüğünde sulama başlatılmalı.</li><li>Toprak pH'ı düzenli ölçülmeli.</li><li>Yüksek sıcaklıkta sabah sulama tercih edilmeli.</li><li>AI otonom mod verimliliği ~%22 artırır.</li></ul></div>`; }
+function exportAcademicReport() { const content = document.getElementById('academicReport').innerText; if (!content.trim()) { alert('Önce rapor oluşturun.'); return; } const blob = new Blob([content], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'akademik_rapor_' + new Date().toISOString().slice(0,10) + '.txt'; a.click(); }
+function renderAcademicStats() { const farmers = getFarmers(); const sensors = getSensors(); const orders = getOrders(); document.getElementById('academicStatsContent').innerHTML = `<div class="flex"><div class="stat-card"><div class="stat-value">${farmers.length}</div><div class="stat-label">Çiftçi</div></div><div class="stat-card"><div class="stat-value">${sensors.length}</div><div class="stat-label">Sensör</div></div><div class="stat-card"><div class="stat-value">${farmers.reduce((a,f)=>a+f.parcels.length,0)}</div><div class="stat-label">Arazi</div></div><div class="stat-card"><div class="stat-value">${orders.filter(o=>o.status==='completed').length}</div><div class="stat-label">Tamamlanan İş</div></div></div>`; const ctx = document.getElementById('academicChart').getContext('2d'); if (window._academicChart) window._academicChart.destroy(); window._academicChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran'], datasets: [{ label: 'Ortalama Nem (%)', data: [42,45,50,55,48,38], backgroundColor: 'rgba(44,122,77,0.7)' }, { label: 'Ortalama Sıcaklık (°C)', data: [8,10,15,20,26,32], backgroundColor: 'rgba(230,126,34,0.7)' }] }, options: { responsive: true } }); }
 
-    loadSensors();
-  } catch(e) {
-    console.error("Harita hatası:", e);
-  }
-}
-
-function loadMap(){
-  const ada = document.getElementById('ada').value;
-  const parsel = document.getElementById('parsel').value;
-  const ilce = document.getElementById('ilce').value;
-
-  if(parcelLayer) {
-    map.removeLayer(parcelLayer);
-  }
-
-  // Ada/parsel numarasına göre koordinat hesapla
-  const baseLat = 38.4 + (parseInt(parsel || '0') % 10) * 0.002;
-  const baseLng = 27.1 + (parseInt(ada || '0') % 10) * 0.002;
-
-  parcelLayer = L.polygon([
-    [baseLat, baseLng],
-    [baseLat + 0.005, baseLng],
-    [baseLat + 0.005, baseLng + 0.008],
-    [baseLat, baseLng + 0.008]
-  ], {
-    color: '#2ecc71',
-    fillColor: '#2ecc71',
-    fillOpacity: 0.3,
-    weight: 3
-  }).addTo(map);
-
-  parcelLayer.bindPopup(`
-    <strong style="color:#2ecc71;">Arazi Bilgileri</strong><br>
-    <hr style="margin:8px 0;">
-    <b>İlçe:</b> ${ilce || 'İzmir'}<br>
-    <b>Ada:</b> ${ada}<br>
-    <b>Parsel:</b> ${parsel}<br>
-    <b>Alan:</b> ~2500 m²<br>
-    <b>Tapu Durumu:</b> <span style="color:#27ae60;">İşlenmiş</span>
-  `);
-
-  map.fitBounds(parcelLayer.getBounds(), {padding: [50, 50]});
-  loadSensors();
-}
-
-function loadSensors(){
-  sensorMarkers.forEach(m => {
-    if(map.hasLayer(m)) map.removeLayer(m);
-  });
-  sensorMarkers = [];
-
-  sensorData.forEach(s => {
-    let color;
-    if(s.status === "Kritik") color = '#e74c3c';
-    else if(s.status === "Orta") color = '#f39c12';
-    else color = '#2ecc71';
-
-    const marker = L.circleMarker([s.lat, s.lng], {
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.8,
-      radius: 10,
-      weight: 2
-    }).addTo(map);
-
-    marker.bindPopup(`
-      <strong style="color:${color};">${s.name}</strong><br>
-      <hr>
-      <b>Nem:</b> ${s.moisture}%<br>
-      <b>Sıcaklık:</b> ${s.temp}°C<br>
-      <b>Hava Nem:</b> ${s.humidity}%<br>
-      <b>Durum:</b> ${s.status}
-    `);
-
-    sensorMarkers.push(marker);
-  });
-}
-
-function setMapView(view){
-  currentMapView = view;
-
-  // Buton stillerini güncelle
-  document.querySelectorAll('.map-control-btn').forEach(btn => {
-    btn.classList.remove('active');
-  });
-  document.getElementById('btn' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
-
-  if(!map) return;
-
-  switch(view){
-    case 'default':
-      map.setView([38.5, 27.2], 9);
-      break;
-    case 'satellite':
-      map.setView([38.4623, 27.1011], 14);
-      break;
-    case 'sensors':
-      map.setView([38.4625, 27.1015], 15);
-      break;
-  }
-}
-
-function refreshMap(){
-  if(map){
-    map.invalidateSize();
-    loadSensors();
-  }
-}
-
-// Dashboard ve Grafik
-function initChart(){
-  const ctx = document.getElementById('chart');
-  if(!ctx) return;
-
-  if(chart) {
-    chart.destroy();
-  }
-
-  chart = new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Toprak Nem (%)',
-          data: [],
-          borderColor: '#3498db',
-          backgroundColor: 'rgba(52, 152, 219, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointHoverRadius: 6
-        },
-        {
-          label: 'Sıcaklık (°C)',
-          data: [],
-          borderColor: '#e74c3c',
-          backgroundColor: 'rgba(231, 76, 60, 0.1)',
-          borderWidth: 3,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          yAxisID: 'y1'
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      interaction: {
-        mode: 'index',
-        intersect: false
-      },
-      scales: {
-        y: {
-          type: 'linear',
-          display: true,
-          position: 'left',
-          min: 0,
-          max: 100,
-          title: { display: true, text: 'Nem (%)', color: '#3498db' }
-        },
-        y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
-          min: 15,
-          max: 40,
-          grid: { drawOnChartArea: false },
-          title: { display: true, text: 'Sıcaklık (°C)', color: '#e74c3c' }
-        }
-      },
-      plugins: {
-        legend: { position: 'top' }
-      }
-    }
-  });
-}
-
-function updateQuotaBar(){
-  const fill = document.getElementById('quotaFill');
-  const percent = (quota / initialQuota) * 100;
-  fill.style.width = percent + '%';
-
-  if(percent < 20) {
-    fill.style.background = 'linear-gradient(90deg, #e74c3c, #c0392b)';
-  } else if(percent < 50) {
-    fill.style.background = 'linear-gradient(90deg, #f39c12, #e67e22)';
-  } else {
-    fill.style.background = 'linear-gradient(90deg, #2ecc71, #27ae60)';
-  }
-}
-
-function updateWeather(){
-  const weather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
-  document.getElementById('weatherTemp').innerText = weather.temp + '°C';
-  document.getElementById('weatherDesc').innerText = weather.desc;
-  document.getElementById('weatherWind').innerText = weather.wind + ' km/s';
-  document.getElementById('weatherHum').innerText = weather.humidity + '%';
-}
-
-function startSimulation(){
-  if(simulationInterval) clearInterval(simulationInterval);
-
-  // Başlangıç hava durumu
-  updateWeather();
-
-  simulationInterval = setInterval(() => {
-    const moisture = Math.floor(Math.random() * 100);
-    const temp = Math.floor(Math.random() * 15) + 20;
-    const humidity = Math.floor(Math.random() * 40) + 40;
-    const auto = document.getElementById('autoMode') ? document.getElementById('autoMode').checked : false;
-
-    document.getElementById('moisture').innerText = moisture;
-    document.getElementById('temp').innerText = temp;
-    document.getElementById('humidity').innerText = humidity;
-
-    let status = "İyi";
-    let statusClass = "success";
-    let alertIcon = '<svg class="alert-icon" viewBox="0 0 24 24" fill="#27ae60"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
-    let decision = "Sulama gerekmiyor. Bitkileriniz sağlıklı.";
-
-    if(moisture < 30){
-      status = "Kritik - Susuzluk riski!";
-      statusClass = "critical";
-      alertIcon = '<svg class="alert-icon" viewBox="0 0 24 24" fill="#dc3545"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
-      decision = auto
-        ? "OTOMATİK SULAMA BAŞLATILDI - Kritik nem seviyesi!"
-        : "HEMEN SULAMA YAPIN! Nem: " + moisture + "% - Kritik seviyede!";
-    } else if(moisture < 50){
-      status = "Orta - Dikkat gerekebilir";
-      statusClass = "warning";
-      alertIcon = '<svg class="alert-icon" viewBox="0 0 24 24" fill="#ff9800"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>';
-      decision = auto
-        ? "Orta seviyede nem. 30 dakika içinde sulama başlayacak."
-        : "Yakında sulama planlayın. Mevcut nem: " + moisture + "%";
-    } else if(moisture > 80){
-      status = "Yüksek - Fazla nem";
-      statusClass = "warning";
-      alertIcon = '<svg class="alert-icon" viewBox="0 0 24 24" fill="#ff9800"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>';
-      decision = "Dikkat! Aşırı nem. Drenaj kontrolü yapın.";
-    }
-
-    const statusBox = document.getElementById('statusBox');
-    statusBox.className = 'alert ' + statusClass;
-    statusBox.innerHTML = alertIcon + ' Durum: <span id="status">' + status + '</span>';
-    document.getElementById('aiDecision').innerHTML = '<p style="margin:0;">' + decision + '</p>';
-
-    if(quota > 0){
-      quota--;
-      todayUsage++;
-      document.getElementById('quota').innerText = quota;
-      document.getElementById('quotaIcon').textContent = quota;
-      document.getElementById('todayUsage').innerText = todayUsage;
-      updateQuotaBar();
-    }
-
-    if(chart){
-      const time = new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'});
-      chart.data.labels.push(time);
-      chart.data.datasets[0].data.push(moisture);
-      chart.data.datasets[1].data.push(temp);
-
-      if(chart.data.labels.length > 15){
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-        chart.data.datasets[1].data.shift();
-      }
-      chart.update('none');
-    }
-  }, 3000);
-}
-
-// Hastalık Tespiti
-function analyzeDisease(event){
-  const file = event.target.files[0];
-  if(!file) return;
-
-  const resultDiv = document.getElementById('diseaseResult');
-  resultDiv.innerHTML = '<p style="text-align:center;"><em>Analiz yapılıyor...</em></p>';
-  document.getElementById('aiDecision').innerHTML = '<p style="margin:0;">Görüntü işleniyor, lütfen bekleyin...</p>';
-
-  setTimeout(() => {
-    const result = diseaseDatabase[Math.floor(Math.random() * diseaseDatabase.length)];
-
-    let severityClass = 'severity-low';
-    let severityColor = '#27ae60';
-    if(result.severity === 'medium') {severityClass = 'severity-medium'; severityColor = '#f39c12';}
-    else if(result.severity === 'high') {severityClass = 'severity-high'; severityColor = '#e67e22';}
-    else if(result.severity === 'critical') {severityClass = 'severity-critical'; severityColor = '#dc3545';}
-
-    resultDiv.innerHTML = `
-      <div style="padding:20px; background:#f8f9fa; border-radius:12px; border:2px solid ${severityColor};">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <h4 style="color:${severityColor}; margin:0;">${result.name}</h4>
-          <span class="severity-badge ${severityClass}">${result.severity.toUpperCase()}</span>
-        </div>
-        <p style="margin:10px 0;"><strong>Belirtiler:</strong> ${result.symptoms}</p>
-        <p style="margin:10px 0;"><strong>Öneri:</strong> ${result.advice}</p>
-      </div>
-    `;
-
-    document.getElementById('aiDecision').innerHTML = `
-      <div style="display:flex; align-items:center; gap:10px;">
-        <span style="width:30px; height:30px; background:${severityColor}; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        </span>
-        <div>
-          <strong>AI Analiz Sonucu:</strong><br>
-          ${result.name} tespit edildi.<br>
-          <small>${result.advice}</small>
-        </div>
-      </div>
-    `;
-
-    if(quota > 0){
-      quota--;
-      document.getElementById('quota').innerText = quota;
-      document.getElementById('quotaIcon').textContent = quota;
-      updateQuotaBar();
-    }
-  }, 1500);
-}
-
-// Admin Fonksiyonları
-function loadCustomerData(){
-  const sel = document.getElementById('customerSelect').value;
-  const container = document.getElementById('adminCustomerData');
-
-  if(!sel){
-    container.classList.add('hidden');
-    return;
-  }
-
-  container.classList.remove('hidden');
-
-  const customerData = {
-    farmer1: {parcels: 3, sensors: 5, quota: 850, lastActivity: "Bugün 14:30"},
-    farmer2: {parcels: 2, sensors: 4, quota: 1200, lastActivity: "Bugün 12:15"},
-    farmer3: {parcels: 5, sensors: 8, quota: 450, lastActivity: "Dün 18:45"}
-  };
-
-  const data = customerData[sel] || {parcels: 0, sensors: 0, quota: 0};
-  document.getElementById('adminParcelCount').innerText = data.parcels;
-  document.getElementById('adminSensorCount').innerText = data.sensors;
-  document.getElementById('adminQuota').innerText = data.quota;
-
-  document.getElementById('adminAiLog').innerHTML = `
-    <div class="alert critical">
-      <strong>10:30</strong> - Nem sensörü kritik seviyede. Otomatik sulama başlatıldı.
-    </div>
-    <div class="alert success">
-      <strong>09:15</strong> - Yaprak analizi: Bitki sağlıklı.
-    </div>
-    <div class="alert warning">
-      <strong>08:45</strong> - Sıcaklık yükselmesi uyarısı gönderildi.
-    </div>
-  `;
-}
-
-// Sayfa yüklendiğinde
-document.addEventListener('DOMContentLoaded', () => {
-  updateQuotaBar();
-});
+// ==================== FIELD MANAGER ====================
+function initFieldPanel() { renderFieldStats(); renderPendingOrders(); const farmers = getFarmers(); document.getElementById('billingFarmer').innerHTML = farmers.map(f => `<option value="${f.id}">${f.name} (${f.package})</option>`).join(''); document.querySelectorAll('#fieldPanel .tab-content').forEach(el => el.classList.remove('active')); document.getElementById('fieldPending').classList.add('active'); }
+function renderFieldStats() { const orders = getOrders(); const sensors = getSensors(); document.getElementById('fieldStats').innerHTML = `<div class="stat-card"><div class="stat-value">${orders.filter(o=>o.status==='processing').length}</div><div class="stat-label">⏳ Bekleyen Görev</div></div><div class="stat-card"><div class="stat-value">${orders.filter(o=>o.status==='completed').length}</div><div class="stat-label">✅ Tamamlandı</div></div><div class="stat-card"><div class="stat-value">${sensors.length}</div><div class="stat-label">📡 Kurulu Sensör</div></div>`; }
+function renderPendingOrders() { const orders = getOrders().filter(o => o.status === 'processing'); const container = document.getElementById('pendingOrdersList'); const noEl = document.getElementById('noPending'); if (orders.length === 0) { container.innerHTML = ''; noEl.classList.remove('hidden'); return; } noEl.classList.add('hidden'); container.innerHTML = orders.map(o => `<div class="card" style="border-left:4px solid #2c7a4d;"><div class="flex" style="justify-content:space-between;"><div><b>${o.farmerName}</b> — ${o.sensorCount} sensör<br><span style="font-size:13px;">Arazi: ${o.parcelName||'-'} | ${new Date(o.createdAt).toLocaleDateString('tr-TR')}</span></div><div class="flex"><button onclick="placeSensors('${o.id}')">📡 Sensör Yerleştir</button><button class="secondary" onclick="showOrderDetail('${o.id}')">Detay</button></div></div></div>`).join(''); }
+function placeSensors(orderId) { const orders = getOrders(); const order = orders.find(o => o.id === orderId); if (!order) return; const count = prompt(`${order.sensorCount} sensör sipariş edildi. Kaçını yerleştireceksiniz?`, order.sensorCount); if (!count || isNaN(count)) return; order.status = 'completed'; saveOrders(orders); let sensors = getSensors(); for (let i=0; i<parseInt(count); i++) { sensors.push({ id:'s'+Date.now()+i, name:`Sensör-${sensors.length+1}`, farmerId:order.farmerId, parcelId:order.parcelId, status:'Aktif', lat:37+Math.random()*5, lng:29+Math.random()*10, installedAt:new Date().toISOString() }); } saveSensors(sensors); let fieldManagers = getFieldManagers(); const fm = fieldManagers.find(f => f.id === currentUser.id); if (!fm.history) fm.history = []; fm.history.unshift({ action:`${count} sensör kurulumu — ${order.farmerName}`, orderId, date:new Date().toISOString() }); saveAllUsers(getFarmers(), getAdmins(), getAcademics(), fieldManagers); renderPendingOrders(); renderFieldStats(); showToast(translations[currentLang].toastSuccess, 'success'); }
+function renderFieldHistory() { const fm = getFieldManagers().find(f => f.id === currentUser.id); const history = fm?.history || []; const container = document.getElementById('fieldHistoryList'); const noEl = document.getElementById('noHistory'); if (history.length === 0) { container.innerHTML = ''; noEl.classList.remove('hidden'); return; } noEl.classList.add('hidden'); container.innerHTML = history.map(h => `<div style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid #f0f4f8;"><span>${h.action}</span><span style="font-size:12px;">${new Date(h.date).toLocaleString('tr-TR')}</span></div>`).join(''); }
+function chargeFarmer() { const farmerId = document.getElementById('billingFarmer').value; const service = document.getElementById('billingService').value; const amount = document.getElementById('billAmount').value; const note = document.getElementById('billNote').value; if (!amount) { alert('Tutar giriniz.'); return; } const farmer = getFarmers().find(f => f.id === farmerId); let fieldManagers = getFieldManagers(); const fm = fieldManagers.find(f => f.id === currentUser.id); if (!fm.billings) fm.billings = []; const billing = { id:'bill'+Date.now(), farmerId, farmerName:farmer.name, service, amount, note, date:new Date().toISOString() }; fm.billings.push(billing); saveAllUsers(getFarmers(), getAdmins(), getAcademics(), fieldManagers); document.getElementById('billingResult').innerHTML = `<div class="alert success">✅ ${farmer.name} adına <b>${amount} TL</b> fatura kesildi.</div>`; document.getElementById('billAmount').value = ''; document.getElementById('billNote').value = ''; renderBillingHistory(); showToast(translations[currentLang].toastSuccess, 'success'); }
+function renderBillingHistory() { const fm = getFieldManagers().find(f => f.id === currentUser.id); const billings = fm?.billings || []; const container = document.getElementById('billingHistory'); if (billings.length === 0) { container.innerHTML = '<p style="color:#999;">Fatura geçmişi yok.</p>'; return; } let html = '<table><tr><th>Çiftçi</th><th>Hizmet</th><th>Tutar</th><th>Tarih</th></tr>'; billings.slice().reverse().forEach(b => { html += `<tr><td>${b.farmerName}</td><td>${b.service}</td><td><b>${b.amount} TL</b></td><td style="font-size:12px;">${new Date(b.date).toLocaleDateString('tr-TR')}</td></tr>`; }); html += '</table>'; container.innerHTML = html; }
+function initFieldLeafletMap() { setTimeout(() => { const mapEl = document.getElementById('fieldLeafletMap'); if (!mapEl || mapEl._leaflet_id) return; const m = L.map('fieldLeafletMap').setView([39.0, 35.0], 6); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(m); getSensors().forEach(s => { L.marker([s.lat, s.lng], { icon: L.divIcon({ html:'📡', iconSize:[30,30], className:'' }) }).addTo(m).bindPopup(`<b>${s.name}</b><br>Durum: ${s.status}`); }); }, 200); }
+function showOrderDetail(oid) { const o = getOrders().find(x => x.id === oid); if (!o) return; document.getElementById('orderDetailContent').innerHTML = `<p><b>Sipariş No:</b> ${o.id}</p><p><b>Çiftçi:</b> ${o.farmerName}</p><p><b>Arazi:</b> ${o.parcelName||'-'}</p><p><b>Sensör Sayısı:</b> ${o.sensorCount}</p><p><b>Durum:</b> ${o.status}</p><p><b>Tarih:</b> ${new Date(o.createdAt).toLocaleString('tr-TR')}</p>`; document.getElementById('orderDetailModal').classList.remove('hidden'); }
+function showToast(msg, type='info') { const toast = document.createElement('div'); toast.className = 'alert ' + type; toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:14px 20px;max-width:360px;box-shadow:0 4px 16px rgba(0,0,0,0.15);animation:fadeIn 0.3s;'; toast.innerHTML = msg; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 3000); }
+window.addEventListener('keydown', e => { if (e.key === 'Enter' && document.getElementById('loginScreen') && !document.getElementById('loginScreen').classList.contains('hidden')) handleLogin(); });
+initData(); setLanguage(currentLang); const saved = localStorage.getItem('currentUser'); if (saved) { currentUser = JSON.parse(saved); if (currentUser.role === 'farmer') { const fresh = getFarmers().find(f => f.id === currentUser.id); if (fresh) currentUser = { ...fresh, role:'farmer' }; } showPanelByRole(); } else { document.getElementById('loginScreen').classList.remove('hidden'); }
 </script>
 </body>
 </html>
